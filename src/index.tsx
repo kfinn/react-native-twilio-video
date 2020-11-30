@@ -1,9 +1,7 @@
-import { NativeModules } from 'react-native';
+import Room from './models/Room';
 
-type TwilioVideoType = {
-  multiply(a: number, b: number): Promise<number>;
-};
+export { Room };
 
-const { TwilioVideo } = NativeModules;
+const { connect } = Room;
 
-export default TwilioVideo as TwilioVideoType;
+export default { connect };

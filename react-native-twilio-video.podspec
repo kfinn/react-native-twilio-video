@@ -10,7 +10,7 @@ Pod::Spec.new do |s|
   s.license      = package["license"]
   s.authors      = package["author"]
 
-  s.platforms    = { :ios => "9.0" }
+  s.platforms    = { :ios => "11.0" }
   s.source       = { :git => "https://github.com/kfinn/react-native-twilio-video.git", :tag => "#{s.version}" }
 
   
@@ -18,4 +18,5 @@ Pod::Spec.new do |s|
   
 
   s.dependency "React"
+  s.dependency 'TwilioVideo', '~> 3.7'
 end
