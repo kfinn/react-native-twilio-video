@@ -1,6 +1,6 @@
 @objc(TwilioVideo)
 class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate {
-    var roomsBySid = [String: Room]()
+    var rooms = [Room]()
 
     var isObserving: Bool = false
     
@@ -11,7 +11,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate {
         resolve: RCTPromiseResolveBlock,
         reject: RCTPromiseRejectBlock
     ) {
-        let twilioOptions = ConnectOptions.init(token: token) { (builder) in
+        let twilioOptions = ConnectOptions(token: token) { (builder) in
 //            if (options.keys.contains("audioTracks")) {
 //                builder.audioTracks
 //            }
@@ -64,19 +64,40 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate {
         }
         
         let room = TwilioVideoSDK.connect(options: twilioOptions, delegate: self)
-        roomsBySid[room.sid] = room
+        rooms.append(room)
         resolve(room.toReactAttributes())
+    }
+    
+    private func findRoom(sid: String) -> Room? {
+        return rooms.first { $0.sid == sid }
+    }
+    
+    private func findRemoteAudioTrack(sid: String) -> RemoteAudioTrack? {
+        let remoteParticipants = rooms.flatMap { $0.remoteParticipants }
+        let remoteAudioTrackPublications = remoteParticipants.flatMap { $0.remoteAudioTracks }
+        let remoteAudioTracks = remoteAudioTrackPublications.compactMap { $0.remoteTrack }
+        return remoteAudioTracks.first { $0.sid == sid }
     }
     
     @objc(disconnect:resolver:rejecter:)
     func disconnect(sid: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
-        let maybeRoom = roomsBySid[sid]
+        let maybeRoom = findRoom(sid: sid)
         if let room = maybeRoom {
             room.disconnect()
-            roomsBySid.removeValue(forKey: sid)
+            rooms.removeAll { $0.sid == sid }
             resolve(true)
         } else {
             reject("404", "Room not found", nil)
+        }
+    }
+    
+    @objc(setRemoteAudioTrackEnabled:sid:resolver:rejecter:)
+    func setRemoteAudioTrackEnabled(enabled: Bool, sid: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if let remoteAudioTrack = findRemoteAudioTrack(sid: sid) {
+            remoteAudioTrack.isPlaybackEnabled = enabled
+            resolve(true)
+        } else {
+            reject("404", "RemoteAudioTrack not found", nil)
         }
     }
     

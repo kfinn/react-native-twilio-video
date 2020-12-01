@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from 'react';
 import { StyleSheet, Text, View } from 'react-native';
 import TwilioVideo, {
+  RemoteAudioTrackPublication,
   RemoteParticipant,
   Room,
 } from 'react-native-twilio-video';
@@ -14,180 +15,140 @@ export default function App() {
 
     const connectAsync = async () => {
       try {
-        const connectedRoom = await TwilioVideo.connect('token', {
-          roomName: 'room name',
-        });
+        const connectedRoom = await TwilioVideo.connect(
+          'token',
+          {
+            roomName: 'room name',
+          }
+        );
 
-        connectedRoom.on('connected', (data) => {
+        connectedRoom.on('connected', () => {
           console.log('connected');
-          console.log(data);
         });
-        connectedRoom.on('failedToConnect', (data) => {
+        connectedRoom.on('failedToConnect', () => {
           console.log('failedToConnect');
-          console.log(data);
         });
-        connectedRoom.on('disconnected', (data) => {
+        connectedRoom.on('disconnected', () => {
           console.log('disconnected');
-          console.log(data);
         });
-        connectedRoom.on('reconnecting', (data) => {
+        connectedRoom.on('reconnecting', () => {
           console.log('reconnecting');
-          console.log(data);
         });
-        connectedRoom.on('reconnected', (data) => {
+        connectedRoom.on('reconnected', () => {
           console.log('reconnected');
-          console.log(data);
         });
         connectedRoom.on('participantConnected', (data) => {
           console.log('participantConnected');
-          console.log(data);
 
           const { participant } = data as { participant: RemoteParticipant };
 
-          participant.on('audioTrackDisabled', (participantEventData) => {
+          participant.on('audioTrackDisabled', () => {
             console.log('audioTrackDisabled');
-            console.log(participantEventData);
           });
 
-          participant.on('audioTrackEnabled', (participantEventData) => {
+          participant.on('audioTrackEnabled', () => {
             console.log('audioTrackEnabled');
-            console.log(participantEventData);
           });
 
-          participant.on('audioTrackPublished', (participantEventData) => {
+          participant.on('audioTrackPublished', () => {
             console.log('audioTrackPublished');
-            console.log(participantEventData);
           });
 
-          participant.on(
-            'audioTrackPublishPriorityChanged',
-            (participantEventData) => {
-              console.log('audioTrackPublishPriorityChanged');
-              console.log(participantEventData);
-            }
-          );
+          participant.on('audioTrackPublishPriorityChanged', () => {
+            console.log('audioTrackPublishPriorityChanged');
+          });
 
           participant.on('audioTrackSubscribed', (participantEventData) => {
             console.log('audioTrackSubscribed');
-            console.log(participantEventData);
+            const { publication } = participantEventData as {
+              publication: RemoteAudioTrackPublication;
+            };
+            const { remoteTrack } = publication;
+
+            remoteTrack!.setIsPlaybackEnabled(false).catch((reason) => {
+              console.log('remoteTrack.setIsPlaybackEnabled error');
+              console.log(reason);
+            });
           });
 
-          participant.on(
-            'audioTrackSubscriptionFailed',
-            (participantEventData) => {
-              console.log('audioTrackSubscriptionFailed');
-              console.log(participantEventData);
-            }
-          );
+          participant.on('audioTrackSubscriptionFailed', () => {
+            console.log('audioTrackSubscriptionFailed');
+          });
 
-          participant.on('audioTrackUnpublished', (participantEventData) => {
+          participant.on('audioTrackUnpublished', () => {
             console.log('audioTrackUnpublished');
-            console.log(participantEventData);
           });
 
-          participant.on('audioTrackUnsubscribed', (participantEventData) => {
+          participant.on('audioTrackUnsubscribed', () => {
             console.log('audioTrackUnsubscribed');
-            console.log(participantEventData);
           });
 
-          participant.on('dataTrackPublished', (participantEventData) => {
+          participant.on('dataTrackPublished', () => {
             console.log('dataTrackPublished');
-            console.log(participantEventData);
           });
 
-          participant.on(
-            'dataTrackPublishPriorityChanged',
-            (participantEventData) => {
-              console.log('dataTrackPublishPriorityChanged');
-              console.log(participantEventData);
-            }
-          );
+          participant.on('dataTrackPublishPriorityChanged', () => {
+            console.log('dataTrackPublishPriorityChanged');
+          });
 
-          participant.on('dataTrackSubscribed', (participantEventData) => {
+          participant.on('dataTrackSubscribed', () => {
             console.log('dataTrackSubscribed');
-            console.log(participantEventData);
           });
 
-          participant.on(
-            'dataTrackSubscriptionFailed',
-            (participantEventData) => {
-              console.log('dataTrackSubscriptionFailed');
-              console.log(participantEventData);
-            }
-          );
+          participant.on('dataTrackSubscriptionFailed', () => {
+            console.log('dataTrackSubscriptionFailed');
+          });
 
-          participant.on('dataTrackUnpublished', (participantEventData) => {
+          participant.on('dataTrackUnpublished', () => {
             console.log('dataTrackUnpublished');
-            console.log(participantEventData);
           });
 
-          participant.on('dataTrackUnsubscribed', (participantEventData) => {
+          participant.on('dataTrackUnsubscribed', () => {
             console.log('dataTrackUnsubscribed');
-            console.log(participantEventData);
           });
 
-          participant.on(
-            'networkQualityLevelChanged',
-            (participantEventData) => {
-              console.log('networkQualityLevelChanged');
-              console.log(participantEventData);
-            }
-          );
+          participant.on('networkQualityLevelChanged', () => {
+            console.log('networkQualityLevelChanged');
+          });
 
-          participant.on('videoTrackDisabled', (participantEventData) => {
+          participant.on('videoTrackDisabled', () => {
             console.log('videoTrackDisabled');
-            console.log(participantEventData);
           });
 
-          participant.on('videoTrackEnabled', (participantEventData) => {
+          participant.on('videoTrackEnabled', () => {
             console.log('videoTrackEnabled');
-            console.log(participantEventData);
           });
 
-          participant.on('videoTrackPublished', (participantEventData) => {
+          participant.on('videoTrackPublished', () => {
             console.log('videoTrackPublished');
-            console.log(participantEventData);
           });
 
-          participant.on(
-            'videoTrackPublishPriorityChanged',
-            (participantEventData) => {
-              console.log('videoTrackPublishPriorityChanged');
-              console.log(participantEventData);
-            }
-          );
+          participant.on('videoTrackPublishPriorityChanged', () => {
+            console.log('videoTrackPublishPriorityChanged');
+          });
 
-          participant.on('videoTrackSubscribed', (participantEventData) => {
+          participant.on('videoTrackSubscribed', () => {
             console.log('videoTrackSubscribed');
-            console.log(participantEventData);
           });
 
-          participant.on(
-            'videoTrackSubscriptionFailed',
-            (participantEventData) => {
-              console.log('videoTrackSubscriptionFailed');
-              console.log(participantEventData);
-            }
-          );
+          participant.on('videoTrackSubscriptionFailed', () => {
+            console.log('videoTrackSubscriptionFailed');
+          });
 
-          participant.on('videoTrackSwitchedOff', (participantEventData) => {
+          participant.on('videoTrackSwitchedOff', () => {
             console.log('videoTrackSwitchedOff');
-            console.log(participantEventData);
           });
 
-          participant.on('videoTrackSwitchedOn', (participantEventData) => {
+          participant.on('videoTrackSwitchedOn', () => {
             console.log('videoTrackSwitchedOn');
-            console.log(participantEventData);
           });
 
-          participant.on('videoTrackUnpublished', (participantEventData) => {
+          participant.on('videoTrackUnpublished', () => {
             console.log('videoTrackUnpublished');
-            console.log(participantEventData);
           });
 
-          participant.on('videoTrackUnsubscribed', (participantEventData) => {
+          participant.on('videoTrackUnsubscribed', () => {
             console.log('videoTrackUnsubscribed');
-            console.log(participantEventData);
           });
         });
         connectedRoom.on('participantDisconnected', (data) => {
@@ -220,16 +181,12 @@ export default function App() {
     return () => {
       const cleanupAsync = async () => {
         const connectedRoom = (await roomPromise) as any;
-        const result = await connectedRoom.disconnect();
+        await connectedRoom.disconnect();
         console.log('disconnect');
-        console.log(result);
       };
       cleanupAsync();
     };
   }, []);
-
-  console.log('render room');
-  console.log(room);
 
   return (
     <View style={styles.container}>

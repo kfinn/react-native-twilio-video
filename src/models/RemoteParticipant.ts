@@ -112,7 +112,7 @@ export default class RemoteParticipant implements RemoteParticipantAttributes {
   };
 
   handleEvent = <Data extends RemoteParticipantEventData>(
-    roomEventType: RemoteParticipantEventType,
+    remoteParticipantEventType: RemoteParticipantEventType,
     data: any,
     buildListenerData?: (eventData: Data) => any
   ) => {
@@ -126,9 +126,11 @@ export default class RemoteParticipant implements RemoteParticipantAttributes {
     const listenerData = buildListenerData
       ? buildListenerData(remoteParticipantEventData)
       : { participant: this };
-    this.listenersByEventType.get(roomEventType).forEach((listener) => {
-      listener(listenerData);
-    });
+    this.listenersByEventType
+      .get(remoteParticipantEventType)
+      .forEach((listener) => {
+        listener(listenerData);
+      });
     this.mergeRemoteParticipantAttributesCleanup();
   };
 

@@ -247,7 +247,7 @@ export default class Room implements RoomAttributes {
         remoteParticipantIndicesToDelete.push(index);
       }
     });
-    this.remoteParticipantIndicesToDelete = this.remoteParticipantIndicesToDelete;
+    this.remoteParticipantIndicesToDelete = remoteParticipantIndicesToDelete;
 
     Object.values(remoteParticipantsAttributesBySid).forEach(
       (remoteParticipantAttributes) => {
