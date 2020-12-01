@@ -11,7 +11,10 @@ extension LocalParticipant {
         return [
             "identity": identity,
             "sid": sid!,
-            "networkQualityLevel": networkQualityLevel.toReactNetworkQualityLevel()
+            "networkQualityLevel": networkQualityLevel.toReactNetworkQualityLevel(),
+            "localAudioTracks": localAudioTracks.map { $0.toReactAttributes() },
+            "localVideoTracks": localVideoTracks.map { $0.toReactAttributes() },
+            "localDataTracks": localDataTracks.map { $0.toReactAttributes() }
         ]
     }
 }

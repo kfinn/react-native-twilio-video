@@ -15,14 +15,41 @@ export default function App() {
 
     const connectAsync = async () => {
       try {
-        const connectedRoom = await TwilioVideo.connect(
-          'token',
-          {
-            roomName: 'room name',
-          }
-        );
+        const connectedRoom = await TwilioVideo.connect('token', {
+          roomName: 'roomName',
+        });
 
-        connectedRoom.on('connected', () => {
+        connectedRoom.on('connected', (data) => {
+          const { localParticipant } = data.room as Room;
+
+          localParticipant!.on('audioTrackPublicationFailed', () => {
+            console.log('audioTrackPublicationFailed');
+          });
+
+          localParticipant!.on('audioTrackPublished', () => {
+            console.log('audioTrackPublished');
+          });
+
+          localParticipant!.on('dataTrackPublicationFailed', () => {
+            console.log('dataTrackPublicationFailed');
+          });
+
+          localParticipant!.on('dataTrackPublished', () => {
+            console.log('dataTrackPublished');
+          });
+
+          localParticipant!.on('networkQualityLevelChanged', () => {
+            console.log('networkQualityLevelChanged');
+          });
+
+          localParticipant!.on('videoTrackPublicationFailed', () => {
+            console.log('videoTrackPublicationFailed');
+          });
+
+          localParticipant!.on('videoTrackPublished', () => {
+            console.log('videoTrackPublished');
+          });
+
           console.log('connected');
         });
         connectedRoom.on('failedToConnect', () => {

@@ -1,6 +1,8 @@
 import type { EmitterSubscription } from 'react-native';
 import { TwilioVideo, TwilioVideoEventEmitter } from '../TwilioVideo';
 import ListenersByEventType, { Listener } from './ListenersByEventType';
+import type { LocalParticipantAttributes } from './LocalParticipant';
+import LocalParticipant from './LocalParticipant';
 import type { RemoteParticipantAttributes } from './RemoteParticipant';
 import RemoteParticipant from './RemoteParticipant';
 
@@ -21,6 +23,7 @@ interface RoomAttributes {
   name: string;
   state: string;
   isRecording: boolean;
+  localParticipant: LocalParticipantAttributes | null;
   remoteParticipants: RemoteParticipantAttributes[];
 }
 
@@ -37,23 +40,31 @@ export default class Room implements RoomAttributes {
   name: string;
   state: string;
   isRecording: boolean;
+  localParticipant: LocalParticipant | null;
   remoteParticipants: RemoteParticipant[];
 
   listenersByEventType = new ListenersByEventType<RoomEventType>();
   subscriptionsByEventType: SubscriptionsByEventType = {};
   remoteParticipantIndicesToDelete?: number[];
+  localParticipantDeleted?: boolean;
 
   private constructor({
     sid,
     name,
     state,
     isRecording,
+    localParticipant,
     remoteParticipants,
   }: RoomAttributes) {
     this.sid = sid;
     this.name = name;
     this.state = state;
     this.isRecording = isRecording;
+    if (localParticipant) {
+      this.localParticipant = new LocalParticipant(localParticipant);
+    } else {
+      this.localParticipant = null;
+    }
     this.remoteParticipants = remoteParticipants.map(
       (remoteParticipant) => new RemoteParticipant(remoteParticipant)
     );
@@ -114,7 +125,7 @@ export default class Room implements RoomAttributes {
   };
 
   onConnected = (data: any) => {
-    this.handleEvent('connected', data, () => ({ room: this }));
+    this.handleEvent('connected', data);
   };
 
   onFailedToConnect = (data: any) => {
@@ -172,11 +183,11 @@ export default class Room implements RoomAttributes {
   };
 
   onRecordingStarted = (data: any) => {
-    this.handleEvent('recordingStarted', data, () => ({ room: this }));
+    this.handleEvent('recordingStarted', data);
   };
 
   onRecordingStopped = (data: any) => {
-    this.handleEvent('recordingStopped', data, () => ({ room: this }));
+    this.handleEvent('recordingStopped', data);
   };
 
   onDominantSpeakerChanged = (data: any) => {
@@ -214,9 +225,13 @@ export default class Room implements RoomAttributes {
     name,
     state,
     isRecording,
+    localParticipant,
     remoteParticipants,
   }: RoomAttributes) => {
-    if (this.remoteParticipantIndicesToDelete) {
+    if (
+      this.remoteParticipantIndicesToDelete ||
+      this.localParticipantDeleted !== undefined
+    ) {
       throw 'attempting to merge room attributes before completing previous merge operation';
     }
 
@@ -224,6 +239,19 @@ export default class Room implements RoomAttributes {
     this.name = name;
     this.state = state;
     this.isRecording = isRecording;
+
+    this.localParticipantDeleted = false;
+    if (this.localParticipant) {
+      if (localParticipant) {
+        this.localParticipant.mergeLocalParticipantAttributes(localParticipant);
+      } else {
+        this.localParticipantDeleted = true;
+      }
+    } else {
+      if (localParticipant) {
+        this.localParticipant = new LocalParticipant(localParticipant);
+      }
+    }
 
     const remoteParticipantsAttributesBySid = {} as {
       [sid: string]: RemoteParticipantAttributes;
@@ -259,9 +287,19 @@ export default class Room implements RoomAttributes {
   };
 
   mergeRoomAttributesCleanup = () => {
-    if (!this.remoteParticipantIndicesToDelete) {
+    if (
+      !this.remoteParticipantIndicesToDelete ||
+      this.localParticipantDeleted === undefined
+    ) {
       throw 'attempting to mergeRoomAttributesCleanup without a merge in progress';
     }
+
+    if (this.localParticipantDeleted) {
+      this.localParticipant!.destroy();
+      this.localParticipant = null;
+    }
+
+    delete this.localParticipantDeleted;
 
     this.remoteParticipantIndicesToDelete.sort((a, b) => b - a);
     this.remoteParticipantIndicesToDelete.forEach((index) => {

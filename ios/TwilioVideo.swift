@@ -1,5 +1,5 @@
 @objc(TwilioVideo)
-class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate {
+class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, LocalParticipantDelegate {
     var rooms = [Room]()
 
     var isObserving: Bool = false
@@ -138,7 +138,15 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate {
             "RemoteParticipant.videoTrackSwitchedOff",
             "RemoteParticipant.videoTrackSwitchedOn",
             "RemoteParticipant.videoTrackUnpublished",
-            "RemoteParticipant.videoTrackUnsubscribed"
+            "RemoteParticipant.videoTrackUnsubscribed",
+
+            "LocalParticipant.audioTrackPublicationFailed",
+            "LocalParticipant.audioTrackPublished",
+            "LocalParticipant.dataTrackPublicationFailed",
+            "LocalParticipant.dataTrackPublished",
+            "LocalParticipant.networkQualityLevelChanged",
+            "LocalParticipant.videoTrackPublicationFailed",
+            "LocalParticipant.videoTrackPublished"
         ]
     }
     
@@ -153,6 +161,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate {
     }
     
     func roomDidConnect(room: Room) {
+        room.localParticipant!.delegate = self
         if (!isObserving) {
             return
         }
@@ -565,7 +574,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate {
             withName: "RemoteParticipant.audioTrackPublishPriorityChanged",
             body: [
                 "participant": participant.toReactAttributes(),
-                "priority": priority.toReactTrackPriority(),
+                "priority": priority.toReactTrackPriority() as Any,
                 "publication": publication.toReactAttributes()
             ]
         )
@@ -579,8 +588,8 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate {
             withName: "RemoteParticipant.videoTrackPublishPriorityChanged",
             body: [
                 "participant": participant.toReactAttributes(),
-                "priority": priority.toReactTrackPriority(),
-                "publication": publication.toReactAttributes()
+                "priority": priority.toReactTrackPriority() as Any,
+                "publication": publication.toReactAttributes() as Any
             ]
         )
     }
@@ -593,8 +602,102 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate {
             withName: "RemoteParticipant.dataTrackPublishPriorityChanged",
             body: [
                 "participant": participant.toReactAttributes(),
-                "priority": priority.toReactTrackPriority(),
-                "publication": publication.toReactAttributes()
+                "priority": priority.toReactTrackPriority() as Any,
+                "publication": publication.toReactAttributes() as Any
+            ]
+        )
+    }
+    
+    func localParticipantDidPublishAudioTrack(participant: LocalParticipant, audioTrackPublication: LocalAudioTrackPublication) {
+        if (!isObserving) {
+            return
+        }
+        sendEvent(
+            withName: "LocalParticipant.audioTrackPublished",
+            body: [
+                "participant": participant.toReactAttributes(),
+                "audioTrackPublication": audioTrackPublication.toReactAttributes()
+            ]
+        )
+    }
+    
+    func localParticipantDidFailToPublishAudioTrack(participant: LocalParticipant, audioTrack: LocalAudioTrack, error: Error) {
+        if (!isObserving) {
+            return
+        }
+        sendEvent(
+            withName: "LocalParticipant.audioTrackPublicationFailed",
+            body: [
+                "participant": participant.toReactAttributes(),
+                "audioTrack": audioTrack.toReactAttributes(),
+                "error": error.localizedDescription
+            ]
+        )
+    }
+    
+    func localParticipantDidPublishDataTrack(participant: LocalParticipant, dataTrackPublication: LocalDataTrackPublication) {
+        if (!isObserving) {
+            return
+        }
+        sendEvent(
+            withName: "LocalParticipant.dataTrackPublished",
+            body: [
+                "participant": participant.toReactAttributes(),
+                "dataTrackPublication": dataTrackPublication.toReactAttributes()
+            ]
+        )
+    }
+    
+    func localParticipantDidFailToPublishDataTrack(participant: LocalParticipant, dataTrack: LocalDataTrack, error: Error) {
+        if (!isObserving) {
+            return
+        }
+        sendEvent(
+            withName: "LocalParticipant.dataTrackPublicationFailed",
+            body: [
+                "participant": participant.toReactAttributes(),
+                "dataTrack": dataTrack.toReactAttributes(),
+                "error": error.localizedDescription
+            ]
+        )
+    }
+    
+    func localParticipantDidPublishVideoTrack(participant: LocalParticipant, videoTrackPublication: LocalVideoTrackPublication) {
+        if (!isObserving) {
+            return
+        }
+        sendEvent(
+            withName: "LocalParticipant.videoTrackPublished",
+            body: [
+                "participant": participant.toReactAttributes(),
+                "videoTrackPublication": videoTrackPublication.toReactAttributes()
+            ]
+        )
+    }
+    
+    func localParticipantDidFailToPublishVideoTrack(participant: LocalParticipant, videoTrack: LocalVideoTrack, error: Error) {
+        if (!isObserving) {
+            return
+        }
+        sendEvent(
+            withName: "LocalParticipant.videoTrackPublicationFailed",
+            body: [
+                "participant": participant.toReactAttributes(),
+                "videoTrack": videoTrack.toReactAttributes(),
+                "error": error.localizedDescription
+            ]
+        )
+    }
+    
+    func localParticipantNetworkQualityLevelDidChange(participant: LocalParticipant, networkQualityLevel: NetworkQualityLevel) {
+        if (!isObserving) {
+            return
+        }
+        sendEvent(
+            withName: "LocalParticipant.networkQualityLevelChanged",
+            body: [
+                "participant": participant.toReactAttributes(),
+                "networkQualityLevel": networkQualityLevel.toReactNetworkQualityLevel() as Any
             ]
         )
     }
