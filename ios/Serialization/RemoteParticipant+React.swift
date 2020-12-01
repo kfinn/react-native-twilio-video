@@ -12,7 +12,10 @@ extension RemoteParticipant {
             "connected": isConnected,
             "identity": identity,
             "sid": sid!,
-            "networkQualityLevel": networkQualityLevel.toReactNetworkQualityLevel()
+            "networkQualityLevel": networkQualityLevel.toReactNetworkQualityLevel(),
+            "remoteAudioTracks": remoteAudioTracks.map { $0.toReactAttributes() },
+            "remoteVideoTracks": remoteVideoTracks.map { $0.toReactAttributes() },
+            "remoteDataTracks": remoteDataTracks.map { $0.toReactAttributes() },
         ]
     }
 }

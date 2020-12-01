@@ -1,6 +1,7 @@
 import Room from './models/Room';
+import RemoteParticipant from './models/RemoteParticipant';
 
-export { Room };
+export { Room, RemoteParticipant };
 
 const { connect } = Room;
 

@@ -24,7 +24,7 @@ interface RoomAttributes {
   remoteParticipants: RemoteParticipantAttributes[];
 }
 
-interface SubscriptionsByEventType {
+export interface SubscriptionsByEventType {
   [key: string]: EmitterSubscription;
 }
 
@@ -94,14 +94,23 @@ export default class Room implements RoomAttributes {
     buildListenerData?: (eventData: Data) => any
   ) => {
     const roomEventData = data as Data;
+    if (
+      (this.sid && this.sid !== roomEventData.room.sid) ||
+      (!this.sid && roomEventData.room.name !== this.name)
+    ) {
+      return;
+    }
     this.mergeRoomAttributesBegin(roomEventData.room);
-    const listenerData = buildListenerData
-      ? buildListenerData(roomEventData)
-      : { room: this };
-    this.listenersByEventType.get(roomEventType).forEach((listener) => {
-      listener(listenerData);
-    });
-    this.mergeRoomAttributesCleanup();
+    try {
+      const listenerData = buildListenerData
+        ? buildListenerData(roomEventData)
+        : { room: this };
+      this.listenersByEventType.get(roomEventType).forEach((listener) => {
+        listener(listenerData);
+      });
+    } finally {
+      this.mergeRoomAttributesCleanup();
+    }
   };
 
   onConnected = (data: any) => {
@@ -258,7 +267,7 @@ export default class Room implements RoomAttributes {
     this.remoteParticipantIndicesToDelete.forEach((index) => {
       const remoteParticipantToDelete = this.remoteParticipants[index];
       remoteParticipantToDelete.destroy();
-      this.remoteParticipants.slice(index, 1);
+      this.remoteParticipants.splice(index, 1);
     });
 
     delete this.remoteParticipantIndicesToDelete;
