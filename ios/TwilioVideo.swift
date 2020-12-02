@@ -2,6 +2,10 @@ import DictionaryCoding
 
 @objc(TwilioVideo)
 class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, LocalParticipantDelegate {
+    override class func requiresMainQueueSetup() -> Bool {
+        return false
+    }
+
     var rooms = [Room]()
     var remoteParticipants: [RemoteParticipant] {
         get {
@@ -18,24 +22,38 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
             return remoteAudioTrackPublications.compactMap { $0.remoteTrack }
         }
     }
+    var remoteVideoTrackPublications: [RemoteVideoTrackPublication] {
+        get {
+            return remoteParticipants.flatMap { $0.remoteVideoTracks }
+        }
+    }
+    var remoteVideoTracks: [RemoteVideoTrack] {
+        get {
+            return remoteVideoTrackPublications.compactMap { $0.remoteTrack }
+        }
+    }
     
-    var localAudioTracksBySid = [String: LocalAudioTrack]()
-    var localVideoTracksBySid = [String: LocalVideoTrack]()
+    var localAudioTracksByName = [String: LocalAudioTrack]()
+    var localVideoTracksByName = [String: LocalVideoTrack]()
 
     private func findRoom(sid: String) -> Room? {
         return rooms.first { $0.sid == sid }
     }
     
-    private func findLocalAudioTrack(sid: String) -> LocalAudioTrack? {
-        return localAudioTracksBySid[sid]
+    private func findLocalAudioTrack(name: String) -> LocalAudioTrack? {
+        return localAudioTracksByName[name]
     }
     
-    private func findLocalVideoTrack(sid: String) -> LocalVideoTrack? {
-        return localVideoTracksBySid[sid]
+    func findLocalVideoTrack(name: String) -> LocalVideoTrack? {
+        return localVideoTracksByName[name]
     }
     
     private func findRemoteAudioTrack(sid: String) -> RemoteAudioTrack? {
         return remoteAudioTracks.first { $0.sid == sid }
+    }
+    
+    func findRemoteVideoTrack(sid: String) -> RemoteVideoTrack? {
+        return remoteVideoTracks.first { $0.sid == sid }
     }
     
     var isObserving: Bool = false
@@ -137,16 +155,39 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         do {
             let localAudioTrackCreateParams = try decoder.decode(LocalAudioTrackCreateParams.self, from: params)
             if let name = localAudioTrackCreateParams.name {
-                if localAudioTracksBySid.keys.contains(name) {
+                if localAudioTracksByName.keys.contains(name) {
                     reject("422", "Duplicate track name", nil)
                     return
                 }
             }
-            if let localAudioTrack = LocalAudioTrack.createFromReact(params: localAudioTrackCreateParams) {
-                localAudioTracksBySid[localAudioTrack.name] = localAudioTrack
-                resolve(localAudioTrack.toReactAttributes())
-            } else {
-                reject("422", "Unable to create remote audio track", nil)
+            let localAudioTrack = LocalAudioTrack.createFromReact(params: localAudioTrackCreateParams)!
+            localAudioTracksByName[localAudioTrack.name] = localAudioTrack
+            resolve(localAudioTrack.toReactAttributes())
+        } catch {
+            reject("422", "Unable to create remote audio track", error)
+        }
+    }
+    
+    @objc(createLocalVideoTrack:resolver:rejecter:)
+    func createLocalVideoTrack(params: [String: Any], resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        do {
+            let localVideoTrackCreateParams = try decoder.decode(LocalVideoTrackCreateParams.self, from: params)
+            if let name = localVideoTrackCreateParams.name {
+                if localVideoTracksByName.keys.contains(name) {
+                    reject("422", "Duplicate track name", nil)
+                    return
+                }
+            }
+            let localVideoTrack = try LocalVideoTrack.createFromReact(params: localVideoTrackCreateParams)!
+            localVideoTracksByName[localVideoTrack.name] = localVideoTrack
+            let cameraSource = localVideoTrack.source as! CameraSource
+            let device = CameraSource.captureDevice(position: .front)!
+            cameraSource.startCapture(device: device) { (device, format, error) in
+                if let error = error {
+                    reject("422", "Unable to create remote video track", error)
+                } else {
+                    resolve(localVideoTrack.toReactAttributes())
+                }
             }
         } catch {
             reject("422", "Unable to create remote audio track", error)

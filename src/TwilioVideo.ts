@@ -7,6 +7,10 @@ import type {
   LocalAudioTrackAttributes,
   LocalAudioTrackCreateParams,
 } from './models/LocalAudioTrack';
+import type {
+  LocalVideoTrackAttributes,
+  LocalVideoTrackCreateParams,
+} from './models/LocalVideoTrack';
 import type Room from './models/Room';
 
 type TwilioVideoType = {
@@ -19,6 +23,9 @@ type TwilioVideoType = {
   createLocalAudioTrack(
     params: LocalAudioTrackCreateParams
   ): Promise<LocalAudioTrackAttributes>;
+  createLocalVideoTrack(
+    params: LocalVideoTrackCreateParams
+  ): Promise<LocalVideoTrackAttributes>;
 } & EventSubscriptionVendor;
 
 export const TwilioVideo = NativeModules.TwilioVideo as TwilioVideoType;

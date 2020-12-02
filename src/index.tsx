@@ -1,3 +1,4 @@
+import RemoteVideoTrackView from './components/RemoteVideoTrackView';
 import LocalAudioTrack from './models/LocalAudioTrack';
 import LocalVideoTrack from './models/LocalVideoTrack';
 import RemoteAudioTrack from './models/RemoteAudioTrack';
@@ -19,6 +20,7 @@ export {
   RemoteParticipant,
   RemoteVideoTrack,
   RemoteVideoTrackPublication,
+  RemoteVideoTrackView,
   Room,
 };
 

@@ -3,6 +3,7 @@ import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import TwilioVideo, {
   RemoteAudioTrackPublication,
   RemoteParticipant,
+  RemoteVideoTrackView,
   Room,
 } from 'react-native-twilio-video';
 
@@ -567,6 +568,12 @@ export default function App() {
                                     <React.Fragment>
                                       <Text>RemoteVideoTrack</Text>
                                       <View style={styles.indent}>
+                                        <RemoteVideoTrackView
+                                          remoteVideoTrack={
+                                            remoteVideoTrackPublication.remoteTrack
+                                          }
+                                          style={styles.video}
+                                        />
                                         <Text>
                                           sid:{' '}
                                           {
@@ -730,5 +737,9 @@ const styles = StyleSheet.create({
   },
   indent: {
     marginLeft: 10,
+  },
+  video: {
+    height: 150,
+    width: 100,
   },
 });
