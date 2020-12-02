@@ -44,7 +44,7 @@ export default class RemoteAudioTrack implements RemoteAudioTrackAttributes {
   };
 
   setIsPlaybackEnabled = async (isPlaybackEnabled: boolean): Promise<void> => {
-    await TwilioVideo.setRemoteAudioTrackEnabled(isPlaybackEnabled, this.sid);
+    await TwilioVideo.updateRemoteAudioTrack(this.sid, { isPlaybackEnabled });
     this.isPlaybackEnabled = isPlaybackEnabled;
   };
 }

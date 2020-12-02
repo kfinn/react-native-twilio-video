@@ -1,5 +1,5 @@
-import React, { useEffect, useState } from 'react';
-import { StyleSheet, Text, View } from 'react-native';
+import React, { useCallback, useEffect, useState } from 'react';
+import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import TwilioVideo, {
   RemoteAudioTrackPublication,
   RemoteParticipant,
@@ -8,6 +8,10 @@ import TwilioVideo, {
 
 export default function App() {
   const [room, setRoom] = useState<Room>();
+  const [roomStateVersion, setRoomStateVersion] = useState(0);
+  const roomChanged = useCallback(() => {
+    setRoomStateVersion((previousVersion) => previousVersion + 1);
+  }, []);
 
   useEffect(() => {
     let roomResolver: any;
@@ -24,69 +28,87 @@ export default function App() {
 
           localParticipant!.on('audioTrackPublicationFailed', () => {
             console.log('audioTrackPublicationFailed');
+            roomChanged();
           });
 
           localParticipant!.on('audioTrackPublished', () => {
             console.log('audioTrackPublished');
+            roomChanged();
           });
 
           localParticipant!.on('dataTrackPublicationFailed', () => {
             console.log('dataTrackPublicationFailed');
+            roomChanged();
           });
 
           localParticipant!.on('dataTrackPublished', () => {
             console.log('dataTrackPublished');
+            roomChanged();
           });
 
           localParticipant!.on('networkQualityLevelChanged', () => {
             console.log('networkQualityLevelChanged');
+            roomChanged();
           });
 
           localParticipant!.on('videoTrackPublicationFailed', () => {
             console.log('videoTrackPublicationFailed');
+            roomChanged();
           });
 
           localParticipant!.on('videoTrackPublished', () => {
             console.log('videoTrackPublished');
+            roomChanged();
           });
 
           console.log('connected');
+          roomChanged();
         });
         connectedRoom.on('failedToConnect', () => {
           console.log('failedToConnect');
+          roomChanged();
         });
         connectedRoom.on('disconnected', () => {
           console.log('disconnected');
+          roomChanged();
         });
         connectedRoom.on('reconnecting', () => {
           console.log('reconnecting');
+          roomChanged();
         });
         connectedRoom.on('reconnected', () => {
           console.log('reconnected');
+          roomChanged();
         });
         connectedRoom.on('participantConnected', (data) => {
           console.log('participantConnected');
+          roomChanged();
 
           const { participant } = data as { participant: RemoteParticipant };
 
           participant.on('audioTrackDisabled', () => {
             console.log('audioTrackDisabled');
+            roomChanged();
           });
 
           participant.on('audioTrackEnabled', () => {
             console.log('audioTrackEnabled');
+            roomChanged();
           });
 
           participant.on('audioTrackPublished', () => {
             console.log('audioTrackPublished');
+            roomChanged();
           });
 
           participant.on('audioTrackPublishPriorityChanged', () => {
             console.log('audioTrackPublishPriorityChanged');
+            roomChanged();
           });
 
           participant.on('audioTrackSubscribed', (participantEventData) => {
             console.log('audioTrackSubscribed');
+            roomChanged();
             const { publication } = participantEventData as {
               publication: RemoteAudioTrackPublication;
             };
@@ -94,105 +116,127 @@ export default function App() {
 
             remoteTrack!.setIsPlaybackEnabled(false).catch((reason) => {
               console.log('remoteTrack.setIsPlaybackEnabled error');
+              roomChanged();
               console.log(reason);
+              roomChanged();
             });
           });
 
           participant.on('audioTrackSubscriptionFailed', () => {
             console.log('audioTrackSubscriptionFailed');
+            roomChanged();
           });
 
           participant.on('audioTrackUnpublished', () => {
             console.log('audioTrackUnpublished');
+            roomChanged();
           });
 
           participant.on('audioTrackUnsubscribed', () => {
             console.log('audioTrackUnsubscribed');
+            roomChanged();
           });
 
           participant.on('dataTrackPublished', () => {
             console.log('dataTrackPublished');
+            roomChanged();
           });
 
           participant.on('dataTrackPublishPriorityChanged', () => {
             console.log('dataTrackPublishPriorityChanged');
+            roomChanged();
           });
 
           participant.on('dataTrackSubscribed', () => {
             console.log('dataTrackSubscribed');
+            roomChanged();
           });
 
           participant.on('dataTrackSubscriptionFailed', () => {
             console.log('dataTrackSubscriptionFailed');
+            roomChanged();
           });
 
           participant.on('dataTrackUnpublished', () => {
             console.log('dataTrackUnpublished');
+            roomChanged();
           });
 
           participant.on('dataTrackUnsubscribed', () => {
             console.log('dataTrackUnsubscribed');
+            roomChanged();
           });
 
           participant.on('networkQualityLevelChanged', () => {
             console.log('networkQualityLevelChanged');
+            roomChanged();
           });
 
           participant.on('videoTrackDisabled', () => {
             console.log('videoTrackDisabled');
+            roomChanged();
           });
 
           participant.on('videoTrackEnabled', () => {
             console.log('videoTrackEnabled');
+            roomChanged();
           });
 
           participant.on('videoTrackPublished', () => {
             console.log('videoTrackPublished');
+            roomChanged();
           });
 
           participant.on('videoTrackPublishPriorityChanged', () => {
             console.log('videoTrackPublishPriorityChanged');
+            roomChanged();
           });
 
           participant.on('videoTrackSubscribed', () => {
             console.log('videoTrackSubscribed');
+            roomChanged();
           });
 
           participant.on('videoTrackSubscriptionFailed', () => {
             console.log('videoTrackSubscriptionFailed');
+            roomChanged();
           });
 
           participant.on('videoTrackSwitchedOff', () => {
             console.log('videoTrackSwitchedOff');
+            roomChanged();
           });
 
           participant.on('videoTrackSwitchedOn', () => {
             console.log('videoTrackSwitchedOn');
+            roomChanged();
           });
 
           participant.on('videoTrackUnpublished', () => {
             console.log('videoTrackUnpublished');
+            roomChanged();
           });
 
           participant.on('videoTrackUnsubscribed', () => {
             console.log('videoTrackUnsubscribed');
+            roomChanged();
           });
         });
-        connectedRoom.on('participantDisconnected', (data) => {
+        connectedRoom.on('participantDisconnected', () => {
           console.log('participantDisconnected');
-          console.log(data);
+          roomChanged();
         });
-        connectedRoom.on('recordingStarted', (data) => {
+        connectedRoom.on('recordingStarted', () => {
           console.log('recordingStarted');
-          console.log(data);
+          roomChanged();
         });
-        connectedRoom.on('recordingStopped', (data) => {
+        connectedRoom.on('recordingStopped', () => {
           console.log('recordingStopped');
-          console.log(data);
+          roomChanged();
         });
-        connectedRoom.on('dominantSpeakerChanged', (data) => {
+        connectedRoom.on('dominantSpeakerChanged', () => {
           console.log('dominantSpeakerChanged');
-          console.log(data);
+          roomChanged();
         });
 
         setRoom(connectedRoom);
@@ -213,19 +257,478 @@ export default function App() {
       };
       cleanupAsync();
     };
-  }, []);
+  }, [roomChanged]);
 
   return (
-    <View style={styles.container}>
-      <Text>Room: {room?.sid}</Text>
-    </View>
+    <ScrollView style={styles.container}>
+      <SafeAreaView>
+        <Text>{roomStateVersion}</Text>
+        {room ? (
+          <React.Fragment>
+            <Text>Room:</Text>
+            <View style={styles.indent}>
+              <Text>sid: {room.sid}</Text>
+              <Text>name: {room.name}</Text>
+              <Text>state: {room.state}</Text>
+              <Text>isRecording: {room.isRecording}</Text>
+              <Text>localParticipant:</Text>
+              {room.localParticipant ? (
+                <React.Fragment>
+                  <View style={styles.indent}>
+                    <Text>identity: {room.localParticipant.identity}</Text>
+                    <Text>sid: {room.localParticipant.sid}</Text>
+                    <Text>
+                      networkQualityLevel:{' '}
+                      {room.localParticipant.networkQualityLevel}
+                    </Text>
+                    <Text>localAudioTracks:</Text>
+                    <View style={styles.indent}>
+                      {room.localParticipant.localAudioTracks.map(
+                        (localAudioTrackPublication) => (
+                          <React.Fragment
+                            key={localAudioTrackPublication.trackSid}
+                          >
+                            <Text>LocalAudioTrackPublication:</Text>
+                            <View style={styles.indent}>
+                              <Text>
+                                trackSid: {localAudioTrackPublication.trackSid}
+                              </Text>
+                              <Text>
+                                trackName:{' '}
+                                {localAudioTrackPublication.trackName}
+                              </Text>
+                              <Text>
+                                priority: {localAudioTrackPublication.priority}
+                              </Text>
+                              <Text>localAudioTrack:</Text>
+                              {localAudioTrackPublication.localTrack ? (
+                                <React.Fragment>
+                                  <Text>LocalAudioTrack</Text>
+                                  <View style={styles.indent}>
+                                    <Text>
+                                      isEnabled:{' '}
+                                      {
+                                        localAudioTrackPublication.localTrack
+                                          .isEnabled
+                                      }
+                                    </Text>
+                                    <Text>
+                                      name:{' '}
+                                      {
+                                        localAudioTrackPublication.localTrack
+                                          .name
+                                      }
+                                    </Text>
+                                    <Text>
+                                      state:{' '}
+                                      {
+                                        localAudioTrackPublication.localTrack
+                                          .state
+                                      }
+                                    </Text>
+                                  </View>
+                                </React.Fragment>
+                              ) : (
+                                <Text>null</Text>
+                              )}
+                            </View>
+                          </React.Fragment>
+                        )
+                      )}
+                    </View>
+                    <Text>localVideoTracks:</Text>
+                    <View style={styles.indent}>
+                      {room.localParticipant.localVideoTracks.map(
+                        (localVideoTrackPublication) => (
+                          <React.Fragment
+                            key={localVideoTrackPublication.trackSid}
+                          >
+                            <Text>LocalVideoTrackPublication:</Text>
+                            <View style={styles.indent}>
+                              <Text>
+                                trackSid: {localVideoTrackPublication.trackSid}
+                              </Text>
+                              <Text>
+                                trackName:{' '}
+                                {localVideoTrackPublication.trackName}
+                              </Text>
+                              <Text>
+                                priority: {localVideoTrackPublication.priority}
+                              </Text>
+                              <Text>localVideoTrack:</Text>
+                              {localVideoTrackPublication.localTrack ? (
+                                <React.Fragment>
+                                  <Text>LocalVideoTrack</Text>
+                                  <View style={styles.indent}>
+                                    <Text>
+                                      isEnabled:{' '}
+                                      {
+                                        localVideoTrackPublication.localTrack
+                                          .isEnabled
+                                      }
+                                    </Text>
+                                    <Text>
+                                      name:{' '}
+                                      {
+                                        localVideoTrackPublication.localTrack
+                                          .name
+                                      }
+                                    </Text>
+                                    <Text>
+                                      state:{' '}
+                                      {
+                                        localVideoTrackPublication.localTrack
+                                          .state
+                                      }
+                                    </Text>
+                                  </View>
+                                </React.Fragment>
+                              ) : (
+                                <Text>null</Text>
+                              )}
+                            </View>
+                          </React.Fragment>
+                        )
+                      )}
+                    </View>
+                    <Text>localDataTracks:</Text>
+                    <View style={styles.indent}>
+                      {room.localParticipant.localDataTracks.map(
+                        (localDataTrackPublication) => (
+                          <React.Fragment
+                            key={localDataTrackPublication.trackSid}
+                          >
+                            <Text>LocalDataTrackPublication:</Text>
+                            <View style={styles.indent}>
+                              <Text>
+                                trackSid: {localDataTrackPublication.trackSid}
+                              </Text>
+                              <Text>
+                                trackName: {localDataTrackPublication.trackName}
+                              </Text>
+                              <Text>
+                                priority: {localDataTrackPublication.priority}
+                              </Text>
+                              <Text>localDataTrack:</Text>
+                              {localDataTrackPublication.localTrack ? (
+                                <React.Fragment>
+                                  <Text>LocalDataTrack</Text>
+                                  <View style={styles.indent}>
+                                    <Text>
+                                      isEnabled:{' '}
+                                      {
+                                        localDataTrackPublication.localTrack
+                                          .isEnabled
+                                      }
+                                    </Text>
+                                    <Text>
+                                      name:{' '}
+                                      {
+                                        localDataTrackPublication.localTrack
+                                          .name
+                                      }
+                                    </Text>
+                                    <Text>
+                                      state:{' '}
+                                      {
+                                        localDataTrackPublication.localTrack
+                                          .state
+                                      }
+                                    </Text>
+                                  </View>
+                                </React.Fragment>
+                              ) : (
+                                <Text>null</Text>
+                              )}
+                            </View>
+                          </React.Fragment>
+                        )
+                      )}
+                    </View>
+                  </View>
+                </React.Fragment>
+              ) : (
+                <Text>null</Text>
+              )}
+              <Text>remoteParticipants:</Text>
+              <View style={styles.indent}>
+                {room.remoteParticipants.map((remoteParticipant) => (
+                  <React.Fragment key={remoteParticipant.sid}>
+                    <Text>RemoteParticipant</Text>
+                    <View style={styles.indent}>
+                      <Text>connected: {remoteParticipant.connected}</Text>
+                      <Text>identity: {remoteParticipant.identity}</Text>
+                      <Text>sid: {remoteParticipant.sid}</Text>
+                      <Text>
+                        networkQualityLevel:{' '}
+                        {remoteParticipant.networkQualityLevel}
+                      </Text>
+                      <Text>remoteAudioTracks:</Text>
+                      <View style={styles.indent}>
+                        {remoteParticipant.remoteAudioTracks.map(
+                          (remoteAudioTrackPublication) => (
+                            <React.Fragment
+                              key={remoteAudioTrackPublication.trackSid}
+                            >
+                              <Text>RemoteAudioTrackPublication</Text>
+                              <View style={styles.indent}>
+                                <Text>
+                                  isTrackSubscribed:{' '}
+                                  {
+                                    remoteAudioTrackPublication.isTrackSubscribed
+                                  }
+                                </Text>
+                                <Text>remoteTrack:</Text>
+                                <View style={styles.indent}>
+                                  {remoteAudioTrackPublication.remoteTrack ? (
+                                    <React.Fragment>
+                                      <Text>RemoteAudioTrack</Text>
+                                      <View style={styles.indent}>
+                                        <Text>
+                                          sid:{' '}
+                                          {
+                                            remoteAudioTrackPublication
+                                              .remoteTrack.sid
+                                          }
+                                        </Text>
+                                        <Text>
+                                          isPlaybackEnabled:{' '}
+                                          {
+                                            remoteAudioTrackPublication
+                                              .remoteTrack.isPlaybackEnabled
+                                          }
+                                        </Text>
+                                        <Text>
+                                          isEnabled:{' '}
+                                          {
+                                            remoteAudioTrackPublication
+                                              .remoteTrack.isEnabled
+                                          }
+                                        </Text>
+                                        <Text>
+                                          name:{' '}
+                                          {
+                                            remoteAudioTrackPublication
+                                              .remoteTrack.name
+                                          }
+                                        </Text>
+                                        <Text>
+                                          state:{' '}
+                                          {
+                                            remoteAudioTrackPublication
+                                              .remoteTrack.state
+                                          }
+                                        </Text>
+                                      </View>
+                                    </React.Fragment>
+                                  ) : (
+                                    <Text>null</Text>
+                                  )}
+                                </View>
+                                <Text>
+                                  publishPriority:{' '}
+                                  {remoteAudioTrackPublication.publishPriority}
+                                </Text>
+                                <Text>
+                                  isTrackEnabled:{' '}
+                                  {remoteAudioTrackPublication.isTrackEnabled}
+                                </Text>
+                                <Text>
+                                  trackName:{' '}
+                                  {remoteAudioTrackPublication.trackName}
+                                </Text>
+                                <Text>
+                                  trackSid:{' '}
+                                  {remoteAudioTrackPublication.trackSid}
+                                </Text>
+                              </View>
+                            </React.Fragment>
+                          )
+                        )}
+                      </View>
+                      <Text>remoteVideoTracks:</Text>
+                      <View style={styles.indent}>
+                        {remoteParticipant.remoteVideoTracks.map(
+                          (remoteVideoTrackPublication) => (
+                            <React.Fragment
+                              key={remoteVideoTrackPublication.trackSid}
+                            >
+                              <Text>RemoteVideoTrackPublication</Text>
+                              <View style={styles.indent}>
+                                <Text>
+                                  isTrackSubscribed:{' '}
+                                  {
+                                    remoteVideoTrackPublication.isTrackSubscribed
+                                  }
+                                </Text>
+                                <Text>remoteTrack:</Text>
+                                <View style={styles.indent}>
+                                  {remoteVideoTrackPublication.remoteTrack ? (
+                                    <React.Fragment>
+                                      <Text>RemoteVideoTrack</Text>
+                                      <View style={styles.indent}>
+                                        <Text>
+                                          sid:{' '}
+                                          {
+                                            remoteVideoTrackPublication
+                                              .remoteTrack.sid
+                                          }
+                                        </Text>
+                                        <Text>
+                                          isSwitchedOff:{' '}
+                                          {
+                                            remoteVideoTrackPublication
+                                              .remoteTrack.isSwitchedOff
+                                          }
+                                        </Text>
+                                        <Text>
+                                          priority:{' '}
+                                          {
+                                            remoteVideoTrackPublication
+                                              .remoteTrack.priority
+                                          }
+                                        </Text>
+                                        <Text>
+                                          isEnabled:{' '}
+                                          {
+                                            remoteVideoTrackPublication
+                                              .remoteTrack.isEnabled
+                                          }
+                                        </Text>
+                                        <Text>
+                                          name:{' '}
+                                          {
+                                            remoteVideoTrackPublication
+                                              .remoteTrack.name
+                                          }
+                                        </Text>
+                                        <Text>
+                                          state:{' '}
+                                          {
+                                            remoteVideoTrackPublication
+                                              .remoteTrack.state
+                                          }
+                                        </Text>
+                                      </View>
+                                    </React.Fragment>
+                                  ) : (
+                                    <Text>null</Text>
+                                  )}
+                                </View>
+                                <Text>
+                                  publishPriority:{' '}
+                                  {remoteVideoTrackPublication.publishPriority}
+                                </Text>
+                                <Text>
+                                  isTrackEnabled:{' '}
+                                  {remoteVideoTrackPublication.isTrackEnabled}
+                                </Text>
+                                <Text>
+                                  trackName:{' '}
+                                  {remoteVideoTrackPublication.trackName}
+                                </Text>
+                                <Text>
+                                  trackSid:{' '}
+                                  {remoteVideoTrackPublication.trackSid}
+                                </Text>
+                              </View>
+                            </React.Fragment>
+                          )
+                        )}
+                      </View>
+                      <Text>remoteDataTracks:</Text>
+                      <View style={styles.indent}>
+                        {remoteParticipant.remoteDataTracks.map(
+                          (remoteDataTrackPublication) => (
+                            <React.Fragment
+                              key={remoteDataTrackPublication.trackSid}
+                            >
+                              <Text>RemoteDataTrackPublication</Text>
+                              <View style={styles.indent}>
+                                <Text>
+                                  isTrackSubscribed:{' '}
+                                  {remoteDataTrackPublication.isTrackSubscribed}
+                                </Text>
+                                <Text>remoteTrack:</Text>
+                                <View style={styles.indent}>
+                                  {remoteDataTrackPublication.remoteTrack ? (
+                                    <React.Fragment>
+                                      <Text>RemoteDataTrack</Text>
+                                      <View style={styles.indent}>
+                                        <Text>
+                                          sid:{' '}
+                                          {
+                                            remoteDataTrackPublication
+                                              .remoteTrack.sid
+                                          }
+                                        </Text>
+                                        <Text>
+                                          isEnabled:{' '}
+                                          {
+                                            remoteDataTrackPublication
+                                              .remoteTrack.isEnabled
+                                          }
+                                        </Text>
+                                        <Text>
+                                          name:{' '}
+                                          {
+                                            remoteDataTrackPublication
+                                              .remoteTrack.name
+                                          }
+                                        </Text>
+                                        <Text>
+                                          state:{' '}
+                                          {
+                                            remoteDataTrackPublication
+                                              .remoteTrack.state
+                                          }
+                                        </Text>
+                                      </View>
+                                    </React.Fragment>
+                                  ) : (
+                                    <Text>null</Text>
+                                  )}
+                                </View>
+                                <Text>
+                                  publishPriority:{' '}
+                                  {remoteDataTrackPublication.publishPriority}
+                                </Text>
+                                <Text>
+                                  isTrackEnabled:{' '}
+                                  {remoteDataTrackPublication.isTrackEnabled}
+                                </Text>
+                                <Text>
+                                  trackName:{' '}
+                                  {remoteDataTrackPublication.trackName}
+                                </Text>
+                                <Text>
+                                  trackSid:{' '}
+                                  {remoteDataTrackPublication.trackSid}
+                                </Text>
+                              </View>
+                            </React.Fragment>
+                          )
+                        )}
+                      </View>
+                    </View>
+                  </React.Fragment>
+                ))}
+              </View>
+            </View>
+          </React.Fragment>
+        ) : (
+          <Text>Not connected</Text>
+        )}
+      </SafeAreaView>
+    </ScrollView>
   );
 }
 
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    alignItems: 'center',
-    justifyContent: 'center',
+  },
+  indent: {
+    marginLeft: 10,
   },
 });

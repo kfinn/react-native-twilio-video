@@ -1,8 +1,11 @@
+import DictionaryCoding
+
 @objc(TwilioVideo)
 class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, LocalParticipantDelegate {
     var rooms = [Room]()
 
     var isObserving: Bool = false
+    let decoder = DictionaryDecoder()
     
     @objc(connect:withOptions:resolver:rejecter:)
     func connect(
@@ -91,11 +94,16 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         }
     }
     
-    @objc(setRemoteAudioTrackEnabled:sid:resolver:rejecter:)
-    func setRemoteAudioTrackEnabled(enabled: Bool, sid: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+    @objc(updateRemoteAudioTrack:params:resolver:rejecter:)
+    func updateRemoteAudioTrack(sid: String, params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if let remoteAudioTrack = findRemoteAudioTrack(sid: sid) {
-            remoteAudioTrack.isPlaybackEnabled = enabled
-            resolve(true)
+            do {
+                let remoteAudioTrackUpdateParams = try decoder.decode(RemoteAudioTrackUpdateParams.self, from: params)
+                remoteAudioTrack.update(params: remoteAudioTrackUpdateParams)
+                resolve(true)
+            } catch {
+                reject("422", "Unable to update remote audio track", error)
+            }
         } else {
             reject("404", "RemoteAudioTrack not found", nil)
         }

@@ -7,6 +7,10 @@
 
 import Foundation
 
+struct RemoteAudioTrackUpdateParams: Codable {
+    let isPlaybackEnabled: Bool?
+}
+
 extension RemoteAudioTrack {
     func toReactAttributes() -> [String: Any] {
         return [
@@ -16,5 +20,11 @@ extension RemoteAudioTrack {
             "name": name,
             "state": state.toReactTrackState() as Any
         ]
+    }
+    
+    func update(params: RemoteAudioTrackUpdateParams) {
+        if let isPlaybackEnabled = params.isPlaybackEnabled {
+            self.isPlaybackEnabled = isPlaybackEnabled
+        }
     }
 }
