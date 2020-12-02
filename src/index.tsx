@@ -1,4 +1,5 @@
 import RemoteVideoTrackView from './components/RemoteVideoTrackView';
+import LocalVideoTrackView from './components/LocalVideoTrackView';
 import LocalAudioTrack from './models/LocalAudioTrack';
 import LocalVideoTrack from './models/LocalVideoTrack';
 import RemoteAudioTrack from './models/RemoteAudioTrack';
@@ -13,6 +14,7 @@ import Room from './models/Room';
 export {
   LocalAudioTrack,
   LocalVideoTrack,
+  LocalVideoTrackView,
   RemoteAudioTrack,
   RemoteAudioTrackPublication,
   RemoteDataTrack,

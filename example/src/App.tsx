@@ -1,6 +1,8 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import TwilioVideo, {
+  LocalVideoTrack,
+  LocalVideoTrackView,
   RemoteAudioTrackPublication,
   RemoteParticipant,
   RemoteVideoTrackView,
@@ -9,10 +11,18 @@ import TwilioVideo, {
 
 export default function App() {
   const [room, setRoom] = useState<Room>();
+  const [localVideoTrack, setLocalVideoTrack] = useState<LocalVideoTrack>();
   const [roomStateVersion, setRoomStateVersion] = useState(0);
   const roomChanged = useCallback(() => {
     setRoomStateVersion((previousVersion) => previousVersion + 1);
   }, []);
+
+  useEffect(() => {
+    const asyncCreateLocalVideoTrack = async () => {
+      setLocalVideoTrack(await LocalVideoTrack.create());
+    };
+    asyncCreateLocalVideoTrack();
+  }, [roomChanged]);
 
   useEffect(() => {
     let roomResolver: any;
@@ -264,6 +274,12 @@ export default function App() {
     <ScrollView style={styles.container}>
       <SafeAreaView>
         <Text>{roomStateVersion}</Text>
+        {localVideoTrack && (
+          <LocalVideoTrackView
+            localVideoTrack={localVideoTrack}
+            style={styles.video}
+          />
+        )}
         {room ? (
           <React.Fragment>
             <Text>Room:</Text>

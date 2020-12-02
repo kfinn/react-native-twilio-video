@@ -1,5 +1,5 @@
 //
-//  RemoteVideoTrackViewManager.swift
+//  LocalVideoTrackViewManager.swift
 //  react-native-twilio-video
 //
 //  Created by Kevin Finn on 12/2/20.
@@ -7,11 +7,10 @@
 
 import Foundation
 
-@objc(RemoteVideoTrackViewManager)
-class RemoteVideoTrackViewManager: RCTViewManager {
+@objc(LocalVideoTrackViewManager)
+class LocalVideoTrackViewManager: RCTViewManager {
     override func view() -> UIView! {
-    
-        let view = RemoteVideoTrackView()
+        let view = LocalVideoTrackView()
         view.bridge = self.bridge
         return view
     }
