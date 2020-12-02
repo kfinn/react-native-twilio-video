@@ -1,3 +1,5 @@
+import LocalAudioTrack from './models/LocalAudioTrack';
+import LocalVideoTrack from './models/LocalVideoTrack';
 import RemoteAudioTrack from './models/RemoteAudioTrack';
 import RemoteAudioTrackPublication from './models/RemoteAudioTrackPublication';
 import RemoteDataTrack from './models/RemoteDataTrack';
@@ -8,6 +10,8 @@ import RemoteVideoTrackPublication from './models/RemoteVideoTrackPublication';
 import Room from './models/Room';
 
 export {
+  LocalAudioTrack,
+  LocalVideoTrack,
   RemoteAudioTrack,
   RemoteAudioTrackPublication,
   RemoteDataTrack,

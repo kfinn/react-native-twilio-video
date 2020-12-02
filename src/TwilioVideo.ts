@@ -3,6 +3,10 @@ import {
   NativeEventEmitter,
   NativeModules,
 } from 'react-native';
+import type {
+  LocalAudioTrackAttributes,
+  LocalAudioTrackCreateParams,
+} from './models/LocalAudioTrack';
 import type Room from './models/Room';
 
 type TwilioVideoType = {
@@ -12,6 +16,9 @@ type TwilioVideoType = {
     sid: string,
     params: { isPlaybackEnabled: boolean }
   ): Promise<boolean>;
+  createLocalAudioTrack(
+    params: LocalAudioTrackCreateParams
+  ): Promise<LocalAudioTrackAttributes>;
 } & EventSubscriptionVendor;
 
 export const TwilioVideo = NativeModules.TwilioVideo as TwilioVideoType;

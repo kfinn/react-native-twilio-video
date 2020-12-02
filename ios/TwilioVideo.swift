@@ -3,7 +3,41 @@ import DictionaryCoding
 @objc(TwilioVideo)
 class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, LocalParticipantDelegate {
     var rooms = [Room]()
+    var remoteParticipants: [RemoteParticipant] {
+        get {
+            return rooms.flatMap { $0.remoteParticipants }
+        }
+    }
+    var remoteAudioTrackPublications: [RemoteAudioTrackPublication] {
+        get {
+            return remoteParticipants.flatMap { $0.remoteAudioTracks }
+        }
+    }
+    var remoteAudioTracks: [RemoteAudioTrack] {
+        get {
+            return remoteAudioTrackPublications.compactMap { $0.remoteTrack }
+        }
+    }
+    
+    var localAudioTracksBySid = [String: LocalAudioTrack]()
+    var localVideoTracksBySid = [String: LocalVideoTrack]()
 
+    private func findRoom(sid: String) -> Room? {
+        return rooms.first { $0.sid == sid }
+    }
+    
+    private func findLocalAudioTrack(sid: String) -> LocalAudioTrack? {
+        return localAudioTracksBySid[sid]
+    }
+    
+    private func findLocalVideoTrack(sid: String) -> LocalVideoTrack? {
+        return localVideoTracksBySid[sid]
+    }
+    
+    private func findRemoteAudioTrack(sid: String) -> RemoteAudioTrack? {
+        return remoteAudioTracks.first { $0.sid == sid }
+    }
+    
     var isObserving: Bool = false
     let decoder = DictionaryDecoder()
     
@@ -71,17 +105,6 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         resolve(room.toReactAttributes())
     }
     
-    private func findRoom(sid: String) -> Room? {
-        return rooms.first { $0.sid == sid }
-    }
-    
-    private func findRemoteAudioTrack(sid: String) -> RemoteAudioTrack? {
-        let remoteParticipants = rooms.flatMap { $0.remoteParticipants }
-        let remoteAudioTrackPublications = remoteParticipants.flatMap { $0.remoteAudioTracks }
-        let remoteAudioTracks = remoteAudioTrackPublications.compactMap { $0.remoteTrack }
-        return remoteAudioTracks.first { $0.sid == sid }
-    }
-    
     @objc(disconnect:resolver:rejecter:)
     func disconnect(sid: String, resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         let maybeRoom = findRoom(sid: sid)
@@ -99,13 +122,34 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         if let remoteAudioTrack = findRemoteAudioTrack(sid: sid) {
             do {
                 let remoteAudioTrackUpdateParams = try decoder.decode(RemoteAudioTrackUpdateParams.self, from: params)
-                remoteAudioTrack.update(params: remoteAudioTrackUpdateParams)
+                remoteAudioTrack.updateFromReact(params: remoteAudioTrackUpdateParams)
                 resolve(true)
             } catch {
                 reject("422", "Unable to update remote audio track", error)
             }
         } else {
             reject("404", "RemoteAudioTrack not found", nil)
+        }
+    }
+    
+    @objc(createLocalAudioTrack:resolver:rejecter:)
+    func createLocalAudioTrack(params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        do {
+            let localAudioTrackCreateParams = try decoder.decode(LocalAudioTrackCreateParams.self, from: params)
+            if let name = localAudioTrackCreateParams.name {
+                if localAudioTracksBySid.keys.contains(name) {
+                    reject("422", "Duplicate track name", nil)
+                    return
+                }
+            }
+            if let localAudioTrack = LocalAudioTrack.createFromReact(params: localAudioTrackCreateParams) {
+                localAudioTracksBySid[localAudioTrack.name] = localAudioTrack
+                resolve(localAudioTrack.toReactAttributes())
+            } else {
+                reject("422", "Unable to create remote audio track", nil)
+            }
+        } catch {
+            reject("422", "Unable to create remote audio track", error)
         }
     }
     

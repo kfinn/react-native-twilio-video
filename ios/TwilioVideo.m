@@ -16,4 +16,8 @@ RCT_EXTERN_METHOD(updateRemoteAudioTrack:(NSString *)sid
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(createLocalAudioTrack:(NSDictionary *)params
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 @end

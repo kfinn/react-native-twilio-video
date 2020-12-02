@@ -22,7 +22,7 @@ extension RemoteAudioTrack {
         ]
     }
     
-    func update(params: RemoteAudioTrackUpdateParams) {
+    func updateFromReact(params: RemoteAudioTrackUpdateParams) {
         if let isPlaybackEnabled = params.isPlaybackEnabled {
             self.isPlaybackEnabled = isPlaybackEnabled
         }
