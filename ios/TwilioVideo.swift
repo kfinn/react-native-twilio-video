@@ -265,6 +265,30 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         }
     }
     
+    @objc(unpublishLocalAudioTrack:resolver:rejecter:)
+    func unpublishLocalAudioTrack(params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if let localAudioTrackName = params["localAudioTrackName"] as? String,
+           let localParticipandSid = params["localParticipantSid"] as? String,
+           let localAudioTrack = findLocalAudioTrack(name: localAudioTrackName),
+           let localParticipant = findLocalParticipant(sid: localParticipandSid) {
+            resolve(localParticipant.unpublishAudioTrack(localAudioTrack))
+        } else {
+            reject("404", "Local audio track or participant not found", nil)
+        }
+    }
+
+    @objc(unpublishLocalVideoTrack:resolver:rejecter:)
+    func unpublishLocalVideoTrack(params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if let localVideoTrackName = params["localVideoTrackName"] as? String,
+           let localParticipandSid = params["localParticipantSid"] as? String,
+           let localVideoTrack = findLocalVideoTrack(name: localVideoTrackName),
+           let localParticipant = findLocalParticipant(sid: localParticipandSid) {
+            resolve(localParticipant.unpublishVideoTrack(localVideoTrack))
+        } else {
+            reject("404", "Local video track or participant not found", nil)
+        }
+    }
+    
     override func supportedEvents() -> [String] {
         return [
             "Room.connected",

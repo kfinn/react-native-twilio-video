@@ -1,7 +1,12 @@
-import RemoteVideoTrackView from './components/RemoteVideoTrackView';
 import LocalVideoTrackView from './components/LocalVideoTrackView';
+import RemoteVideoTrackView from './components/RemoteVideoTrackView';
 import LocalAudioTrack from './models/LocalAudioTrack';
+import LocalAudioTrackPublication from './models/LocalAudioTrackPublication';
+import LocalDataTrack from './models/LocalDataTrack';
+import LocalDataTrackPublication from './models/LocalDataTrackPublication';
+import LocalParticipant from './models/LocalParticipant';
 import LocalVideoTrack from './models/LocalVideoTrack';
+import LocalVideoTrackPublication from './models/LocalVideoTrackPublication';
 import RemoteAudioTrack from './models/RemoteAudioTrack';
 import RemoteAudioTrackPublication from './models/RemoteAudioTrackPublication';
 import RemoteDataTrack from './models/RemoteDataTrack';
@@ -13,7 +18,12 @@ import Room from './models/Room';
 
 export {
   LocalAudioTrack,
+  LocalAudioTrackPublication,
+  LocalDataTrack,
+  LocalDataTrackPublication,
+  LocalParticipant,
   LocalVideoTrack,
+  LocalVideoTrackPublication,
   LocalVideoTrackView,
   RemoteAudioTrack,
   RemoteAudioTrackPublication,

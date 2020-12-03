@@ -101,6 +101,32 @@ export default class LocalParticipant implements LocalParticipantAttributes {
     });
   };
 
+  unpublishLocalAudioTrack = async (
+    localAudioTrack: LocalAudioTrack
+  ): Promise<boolean> => {
+    if (!this.sid) {
+      throw "can't unpublish local audio track before local participant has connected";
+    }
+
+    return await TwilioVideo.unpublishLocalAudioTrack({
+      localAudioTrackName: localAudioTrack.name,
+      localParticipantSid: this.sid,
+    });
+  };
+
+  unpublishLocalVideoTrack = async (
+    localVideoTrack: LocalVideoTrack
+  ): Promise<boolean> => {
+    if (!this.sid) {
+      throw "can't unpublish local video track before local participant has connected";
+    }
+
+    return await TwilioVideo.unpublishLocalVideoTrack({
+      localVideoTrackName: localVideoTrack.name,
+      localParticipantSid: this.sid,
+    });
+  };
+
   on = (eventType: LocalParticipantEventType, listener: Listener) => {
     if (!this.listenersByEventType.isListeningTo(eventType)) {
       this.subscriptionsByEventType[

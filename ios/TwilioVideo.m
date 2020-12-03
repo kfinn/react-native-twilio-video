@@ -40,4 +40,12 @@ RCT_EXTERN_METHOD(publishLocalVideoTrack:(NSDictionary *)params
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(unpublishLocalAudioTrack:(NSDictionary *)params
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
+RCT_EXTERN_METHOD(unpublishLocalVideoTrack:(NSDictionary *)params
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 @end
