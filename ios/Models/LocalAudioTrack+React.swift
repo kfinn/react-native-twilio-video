@@ -64,4 +64,8 @@ extension LocalAudioTrack {
             )
         }
     }
+    
+    func destroyFromReact() {
+        isEnabled = false
+    }
 }

@@ -1,6 +1,7 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
 import TwilioVideo, {
+  LocalAudioTrack,
   LocalVideoTrack,
   LocalVideoTrackView,
   RemoteAudioTrackPublication,
@@ -11,17 +12,70 @@ import TwilioVideo, {
 
 export default function App() {
   const [room, setRoom] = useState<Room>();
+  const [localAudioTrack, setLocalAudioTrack] = useState<LocalAudioTrack>();
   const [localVideoTrack, setLocalVideoTrack] = useState<LocalVideoTrack>();
+  const [publishedTracks, setPublishedTracks] = useState(false);
   const [roomStateVersion, setRoomStateVersion] = useState(0);
   const roomChanged = useCallback(() => {
     setRoomStateVersion((previousVersion) => previousVersion + 1);
   }, []);
 
   useEffect(() => {
+    let localVideoTrackResolve: (
+      value?: LocalVideoTrack | PromiseLike<LocalVideoTrack> | undefined
+    ) => void;
+    const localVideoTrackPromise = new Promise<LocalVideoTrack>(
+      (resolve) => (localVideoTrackResolve = resolve)
+    );
+
     const asyncCreateLocalVideoTrack = async () => {
-      setLocalVideoTrack(await LocalVideoTrack.create());
+      try {
+        const createdLocalVideoTrack = await LocalVideoTrack.create();
+        setLocalVideoTrack(createdLocalVideoTrack);
+        localVideoTrackResolve(createdLocalVideoTrack);
+      } catch (error) {
+        console.log(error);
+      }
     };
     asyncCreateLocalVideoTrack();
+
+    return () => {
+      const cleanupAsync = async () => {
+        const createdLocalVideoTrack = await localVideoTrackPromise;
+        createdLocalVideoTrack.destroy();
+        setLocalVideoTrack(undefined);
+      };
+      cleanupAsync();
+    };
+  }, [roomChanged]);
+
+  useEffect(() => {
+    let localAudioTrackResolve: (
+      value?: LocalAudioTrack | PromiseLike<LocalAudioTrack> | undefined
+    ) => void;
+    const localAudioTrackPromise = new Promise<LocalAudioTrack>(
+      (resolve) => (localAudioTrackResolve = resolve)
+    );
+
+    const asyncCreateLocalAudioTrack = async () => {
+      try {
+        const createdLocalAudioTrack = await LocalAudioTrack.create();
+        setLocalAudioTrack(createdLocalAudioTrack);
+        localAudioTrackResolve(createdLocalAudioTrack);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+    asyncCreateLocalAudioTrack();
+
+    return () => {
+      const cleanupAsync = async () => {
+        const createdLocalAudioTrack = await localAudioTrackPromise;
+        createdLocalAudioTrack.destroy();
+        setLocalAudioTrack(undefined);
+      };
+      cleanupAsync();
+    };
   }, [roomChanged]);
 
   useEffect(() => {
@@ -269,6 +323,43 @@ export default function App() {
       cleanupAsync();
     };
   }, [roomChanged]);
+
+  useEffect(() => {
+    if (
+      !room ||
+      room.state !== 'connected' ||
+      !localAudioTrack ||
+      !localVideoTrack ||
+      publishedTracks
+    ) {
+      return;
+    }
+    const localParticipant = room.localParticipant;
+    if (!localParticipant) {
+      return;
+    }
+
+    const publishTracksAsync = async () => {
+      try {
+        console.log('publishing!', localAudioTrack, localVideoTrack);
+        await Promise.all([
+          localParticipant.publishLocalAudioTrack(localAudioTrack),
+          localParticipant.publishLocalVideoTrack(localVideoTrack),
+        ]);
+      } catch (exception) {
+        console.log(exception);
+      }
+    };
+
+    publishTracksAsync();
+    setPublishedTracks(true);
+  }, [
+    roomStateVersion,
+    room,
+    localAudioTrack,
+    localVideoTrack,
+    publishedTracks,
+  ]);
 
   return (
     <ScrollView style={styles.container}>

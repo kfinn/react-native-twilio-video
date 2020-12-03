@@ -7,6 +7,11 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
     }
 
     var rooms = [Room]()
+    var localParticipants: [LocalParticipant] {
+        get {
+            return rooms.compactMap { $0.localParticipant }
+        }
+    }
     var remoteParticipants: [RemoteParticipant] {
         get {
             return rooms.flatMap { $0.remoteParticipants }
@@ -38,6 +43,10 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
 
     private func findRoom(sid: String) -> Room? {
         return rooms.first { $0.sid == sid }
+    }
+    
+    private func findLocalParticipant(sid: String) -> LocalParticipant? {
+        return localParticipants.first { $0.sid == sid }
     }
     
     private func findLocalAudioTrack(name: String) -> LocalAudioTrack? {
@@ -164,7 +173,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
             localAudioTracksByName[localAudioTrack.name] = localAudioTrack
             resolve(localAudioTrack.toReactAttributes())
         } catch {
-            reject("422", "Unable to create remote audio track", error)
+            reject("422", "Unable to create local audio track", error)
         }
     }
     
@@ -184,13 +193,75 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
             let device = CameraSource.captureDevice(position: .front)!
             cameraSource.startCapture(device: device) { (device, format, error) in
                 if let error = error {
-                    reject("422", "Unable to create remote video track", error)
+                    reject("422", "Unable to create local video track", error)
                 } else {
                     resolve(localVideoTrack.toReactAttributes())
                 }
             }
         } catch {
-            reject("422", "Unable to create remote audio track", error)
+            reject("422", "Unable to create local video track", error)
+        }
+    }
+
+    @objc(destroyLocalAudioTrack:resolve:reject:)
+    func destroyLocalAudioTrack(name: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        if let localAudioTrack = findLocalAudioTrack(name: name) {
+            localParticipants.forEach { (localParticipant) in
+                if localParticipant.localAudioTracks.contains(where: { $0.localTrack == localAudioTrack }) {
+                    localParticipant.unpublishAudioTrack(localAudioTrack)
+                }
+            }
+            localAudioTrack.destroyFromReact()
+            localAudioTracksByName.removeValue(forKey: name)
+            resolve(true)
+        } else {
+            reject("404", "Local video track not found", nil)
+        }
+    }
+
+    @objc(destroyLocalVideoTrack:resolve:reject:)
+    func destroyLocalVideoTrack(name: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
+        if let localVideoTrack = findLocalVideoTrack(name: name) {
+            localParticipants.forEach { (localParticipant) in
+                if localParticipant.localVideoTracks.contains(where: { $0.localTrack == localVideoTrack }) {
+                    localParticipant.unpublishVideoTrack(localVideoTrack)
+                }
+            }
+
+            localVideoTrack.destroyFromReact() { (error) in
+                if let error = error {
+                    reject("422", error.localizedDescription, error)
+                } else {
+                    self.localVideoTracksByName.removeValue(forKey: name)
+                    resolve(true)
+                }
+            }
+        } else {
+            reject("404", "Local video track not found", nil)
+        }
+    }
+    
+    @objc(publishLocalAudioTrack:resolver:rejecter:)
+    func publishLocalAudioTrack(params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if let localAudioTrackName = params["localAudioTrackName"] as? String,
+           let localParticipandSid = params["localParticipantSid"] as? String,
+           let localAudioTrack = findLocalAudioTrack(name: localAudioTrackName),
+           let localParticipant = findLocalParticipant(sid: localParticipandSid) {
+            resolve(localParticipant.publishAudioTrack(localAudioTrack))
+        } else {
+            reject("404", "Local audio track or participant not found", nil)
+        }
+    }
+
+    @objc(publishLocalVideoTrack:resolver:rejecter:)
+    func publishLocalVideoTrack(params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if let localVideoTrackName = params["localVideoTrackName"] as? String,
+           let localParticipandSid = params["localParticipantSid"] as? String,
+           let localVideoTrack = findLocalVideoTrack(name: localVideoTrackName),
+           let localParticipant = findLocalParticipant(sid: localParticipandSid) {
+            resolve(localParticipant.publishVideoTrack(localVideoTrack))
+        } else {
+            reject("404", "Local video track or participant not found", nil)
         }
     }
     

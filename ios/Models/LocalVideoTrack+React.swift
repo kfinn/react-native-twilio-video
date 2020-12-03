@@ -7,6 +7,10 @@
 
 import Foundation
 
+enum LocalVideoTrackCreateError : Error {
+    case unableToCreateCameraSource
+}
+
 struct LocalVideoTrackCreateVideoSourceParams: Codable {
     let enablePreview: Bool?
     
@@ -17,7 +21,11 @@ struct LocalVideoTrackCreateVideoSourceParams: Codable {
             }
         }
         
-        return CameraSource(options: options, delegate: nil)!
+        if let cameraSource = CameraSource(options: options, delegate: nil) {
+            return cameraSource
+        } else {
+            throw LocalVideoTrackCreateError.unableToCreateCameraSource
+        }
     }
 }
 
@@ -36,6 +44,10 @@ struct LocalVideoTrackCreateParams: Codable {
     }
 }
 
+enum LocalVideoTrackDestroyError : Error {
+    case unableToStopCapture
+}
+
 extension LocalVideoTrack {
     func toReactAttributes() -> [String: Any] {
         return [
@@ -51,5 +63,14 @@ extension LocalVideoTrack {
             enabled: params.enabled ?? true,
             name: params.name
         )
+    }
+    
+    func destroyFromReact(completion: @escaping CameraSource.StoppedBlock) {
+        isEnabled = false
+        if let cameraSource = source as? CameraSource {
+            cameraSource.stopCapture(completion: completion)
+        } else {
+            completion(LocalVideoTrackDestroyError.unableToStopCapture)
+        }
     }
 }

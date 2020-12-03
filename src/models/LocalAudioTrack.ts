@@ -37,6 +37,11 @@ export default class LocalAudioTrack implements LocalAudioTrackAttributes {
     return new LocalAudioTrack(localAudioTrackAttributes);
   }
 
+  async destroy(): Promise<void> {
+    await TwilioVideo.destroyLocalAudioTrack(this.name);
+    return;
+  }
+
   mergeLocalAudioTrackAttributes = ({
     isEnabled,
     name,

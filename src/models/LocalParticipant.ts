@@ -1,11 +1,13 @@
 import { TwilioVideo, TwilioVideoEventEmitter } from '../TwilioVideo';
 import ListenersByEventType, { Listener } from './ListenersByEventType';
+import type LocalAudioTrack from './LocalAudioTrack';
 import type { LocalAudioTrackAttributes } from './LocalAudioTrack';
 import type { LocalAudioTrackPublicationAttributes } from './LocalAudioTrackPublication';
 import LocalAudioTrackPublication from './LocalAudioTrackPublication';
 import type { LocalDataTrackAttributes } from './LocalDataTrack';
 import type { LocalDataTrackPublicationAttributes } from './LocalDataTrackPublication';
 import LocalDataTrackPublication from './LocalDataTrackPublication';
+import type LocalVideoTrack from './LocalVideoTrack';
 import type { LocalVideoTrackAttributes } from './LocalVideoTrack';
 import type { LocalVideoTrackPublicationAttributes } from './LocalVideoTrackPublication';
 import LocalVideoTrackPublication from './LocalVideoTrackPublication';
@@ -72,6 +74,32 @@ export default class LocalParticipant implements LocalParticipantAttributes {
         new LocalDataTrackPublication(localDataTrackPublication)
     );
   }
+
+  publishLocalAudioTrack = async (
+    localAudioTrack: LocalAudioTrack
+  ): Promise<boolean> => {
+    if (!this.sid) {
+      throw "can't publish local audio track before local participant has connected";
+    }
+
+    return await TwilioVideo.publishLocalAudioTrack({
+      localAudioTrackName: localAudioTrack.name,
+      localParticipantSid: this.sid,
+    });
+  };
+
+  publishLocalVideoTrack = async (
+    localVideoTrack: LocalVideoTrack
+  ): Promise<boolean> => {
+    if (!this.sid) {
+      throw "can't publish local video track before local participant has connected";
+    }
+
+    return await TwilioVideo.publishLocalVideoTrack({
+      localVideoTrackName: localVideoTrack.name,
+      localParticipantSid: this.sid,
+    });
+  };
 
   on = (eventType: LocalParticipantEventType, listener: Listener) => {
     if (!this.listenersByEventType.isListeningTo(eventType)) {

@@ -26,6 +26,16 @@ type TwilioVideoType = {
   createLocalVideoTrack(
     params: LocalVideoTrackCreateParams
   ): Promise<LocalVideoTrackAttributes>;
+  destroyLocalAudioTrack(name: string): Promise<boolean>;
+  destroyLocalVideoTrack(name: string): Promise<boolean>;
+  publishLocalAudioTrack(params: {
+    localAudioTrackName: string;
+    localParticipantSid: string;
+  }): Promise<boolean>;
+  publishLocalVideoTrack(params: {
+    localVideoTrackName: string;
+    localParticipantSid: string;
+  }): Promise<boolean>;
 } & EventSubscriptionVendor;
 
 export const TwilioVideo = NativeModules.TwilioVideo as TwilioVideoType;
