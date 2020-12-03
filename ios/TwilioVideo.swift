@@ -233,7 +233,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         }
     }
 
-    @objc(destroyLocalAudioTrack:resolve:reject:)
+    @objc(destroyLocalAudioTrack:resolver:rejecter:)
     func destroyLocalAudioTrack(name: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if let localAudioTrack = findLocalAudioTrack(name: name) {
             localParticipants.forEach { (localParticipant) in
@@ -249,7 +249,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         }
     }
 
-    @objc(destroyLocalVideoTrack:resolve:reject:)
+    @objc(destroyLocalVideoTrack:resolver:rejecter:)
     func destroyLocalVideoTrack(name: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if let localVideoTrack = findLocalVideoTrack(name: name) {
             localParticipants.forEach { (localParticipant) in
