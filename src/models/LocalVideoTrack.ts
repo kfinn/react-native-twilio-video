@@ -34,6 +34,11 @@ export default class LocalVideoTrack implements LocalVideoTrackAttributes {
     return new LocalVideoTrack(LocalVideoTrackAttributes);
   }
 
+  setIsEnabled = async (enabled: boolean): Promise<void> => {
+    await TwilioVideo.updateLocalVideoTrack(this.name, { enabled });
+    this.isEnabled = enabled;
+  };
+
   async destroy(): Promise<void> {
     await TwilioVideo.destroyLocalVideoTrack(this.name);
     return;

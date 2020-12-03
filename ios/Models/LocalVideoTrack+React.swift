@@ -44,6 +44,10 @@ struct LocalVideoTrackCreateParams: Codable {
     }
 }
 
+struct LocalVideoTrackUpdateParams: Codable {
+    let enabled: Bool?
+}
+
 enum LocalVideoTrackDestroyError : Error {
     case unableToStopCapture
 }
@@ -63,6 +67,12 @@ extension LocalVideoTrack {
             enabled: params.enabled ?? true,
             name: params.name
         )
+    }
+    
+    func updateFromReact(params: LocalVideoTrackUpdateParams) {
+        if let enabled = params.enabled {
+            self.isEnabled = enabled
+        }
     }
     
     func destroyFromReact(completion: @escaping CameraSource.StoppedBlock) {

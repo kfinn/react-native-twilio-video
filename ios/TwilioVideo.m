@@ -16,6 +16,11 @@ RCT_EXTERN_METHOD(updateLocalAudioTrack:(NSString *)name
                   resolver:(RCTPromiseResolveBlock)resolve
                   rejecter:(RCTPromiseRejectBlock)reject)
 
+RCT_EXTERN_METHOD(updateLocalVideoTrack:(NSString *)name
+                  params:(NSDictionary *)params
+                  resolver:(RCTPromiseResolveBlock)resolve
+                  rejecter:(RCTPromiseRejectBlock)reject)
+
 RCT_EXTERN_METHOD(updateRemoteAudioTrack:(NSString *)sid
                   params:(NSDictionary *)params
                   resolver:(RCTPromiseResolveBlock)resolve

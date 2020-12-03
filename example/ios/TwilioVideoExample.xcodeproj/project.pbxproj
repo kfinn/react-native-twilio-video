@@ -24,7 +24,6 @@
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = TwilioVideoExample/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = TwilioVideoExample/Info.plist; sourceTree = "<group>"; };
 		13B07FB71A68108700A75B9A /* main.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; name = main.m; path = TwilioVideoExample/main.m; sourceTree = "<group>"; };
-		20F357AD24636CDE00C146DC /* TwilioVideoExample-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "TwilioVideoExample-Bridging-Header.h"; sourceTree = "<group>"; };
 		20F357AE24636CDF00C146DC /* TwilioVideoExample-Bridging-Header.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = "TwilioVideoExample-Bridging-Header.h"; sourceTree = "<group>"; };
 		20F357AF24636CDF00C146DC /* File.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = File.swift; sourceTree = "<group>"; };
 		4D7192F03A36A017E887435B /* Pods-TwilioVideoExample.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-TwilioVideoExample.release.xcconfig"; path = "Target Support Files/Pods-TwilioVideoExample/Pods-TwilioVideoExample.release.xcconfig"; sourceTree = "<group>"; };
@@ -87,14 +86,13 @@
 		83CBB9F61A601CBA00E9B192 = {
 			isa = PBXGroup;
 			children = (
-				20F357AF24636CDF00C146DC /* File.swift */,
 				20F357AE24636CDF00C146DC /* TwilioVideoExample-Bridging-Header.h */,
-				13B07FAE1A68108700A75B9A /* TwilioVideoExample */,
-				832341AE1AAA6A7D00B99B32 /* Libraries */,
-				83CBBA001A601CBA00E9B192 /* Products */,
+				20F357AF24636CDF00C146DC /* File.swift */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
+				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				1CFFDEF7170271C97B8B7E5A /* Pods */,
-				20F357AD24636CDE00C146DC /* TwilioVideoExample-Bridging-Header.h */,
+				83CBBA001A601CBA00E9B192 /* Products */,
+				13B07FAE1A68108700A75B9A /* TwilioVideoExample */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";

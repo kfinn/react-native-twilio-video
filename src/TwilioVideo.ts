@@ -20,6 +20,10 @@ type TwilioVideoType = {
     name: string,
     params: { enabled: boolean }
   ): Promise<boolean>;
+  updateLocalVideoTrack(
+    name: string,
+    params: { enabled: boolean }
+  ): Promise<boolean>;
   updateRemoteAudioTrack(
     sid: string,
     params: { isPlaybackEnabled: boolean }

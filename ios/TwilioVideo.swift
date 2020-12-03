@@ -159,6 +159,21 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         }
     }
     
+    @objc(updateLocalVideoTrack:params:resolver:rejecter:)
+    func updateLocalVideoTrack(name: String, params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        if let localVideoTrack = findLocalVideoTrack(name: name) {
+            do {
+                let localVideoTrackUpdateParams = try decoder.decode(LocalVideoTrackUpdateParams.self, from: params)
+                localVideoTrack.updateFromReact(params: localVideoTrackUpdateParams)
+                resolve(true)
+            } catch {
+                reject("422", "Unable to update local video track", error)
+            }
+        } else {
+            reject("404", "LocalVideoTrack not found", nil)
+        }
+    }
+
     @objc(updateRemoteAudioTrack:params:resolver:rejecter:)
     func updateRemoteAudioTrack(sid: String, params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if let remoteAudioTrack = findRemoteAudioTrack(sid: sid) {
