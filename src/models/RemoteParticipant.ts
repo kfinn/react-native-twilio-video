@@ -1,4 +1,4 @@
-import { TwilioVideo, TwilioVideoEventEmitter } from '../TwilioVideo';
+import { TwilioVideoEventEmitter } from '../TwilioVideo';
 import type { Listener } from './ListenersByEventType';
 import ListenersByEventType from './ListenersByEventType';
 import type { RemoteAudioTrackPublicationAttributes } from './RemoteAudioTrackPublication';
@@ -106,7 +106,7 @@ export default class RemoteParticipant implements RemoteParticipantAttributes {
   off = (eventType: RemoteParticipantEventType, listener: Listener) => {
     this.listenersByEventType.remove(eventType, listener);
     if (!this.listenersByEventType.isListeningTo(eventType)) {
-      TwilioVideo.removeSubscription(this.subscriptionsByEventType[eventType]);
+      this.subscriptionsByEventType[eventType].remove();
       delete this.subscriptionsByEventType[eventType];
     }
   };

@@ -142,7 +142,7 @@ export default class LocalParticipant implements LocalParticipantAttributes {
   off = (eventType: LocalParticipantEventType, listener: Listener) => {
     this.listenersByEventType.remove(eventType, listener);
     if (!this.listenersByEventType.isListeningTo(eventType)) {
-      TwilioVideo.removeSubscription(this.subscriptionsByEventType[eventType]);
+      this.subscriptionsByEventType[eventType].remove();
       delete this.subscriptionsByEventType[eventType];
     }
   };

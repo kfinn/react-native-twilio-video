@@ -94,7 +94,7 @@ export default class Room implements RoomAttributes {
   off = (eventType: RoomEventType, listener: Listener) => {
     this.listenersByEventType.remove(eventType, listener);
     if (!this.listenersByEventType.isListeningTo(eventType)) {
-      TwilioVideo.removeSubscription(this.subscriptionsByEventType[eventType]);
+      this.subscriptionsByEventType[eventType].remove();
       delete this.subscriptionsByEventType[eventType];
     }
   };
