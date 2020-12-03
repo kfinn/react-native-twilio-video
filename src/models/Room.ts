@@ -1,5 +1,13 @@
 import type { EmitterSubscription } from 'react-native';
-import { TwilioVideo, TwilioVideoEventEmitter } from '../TwilioVideo';
+import type {
+  LocalAudioTrack,
+  LocalVideoTrack,
+} from 'react-native-twilio-video';
+import {
+  TwilioVideo,
+  TwilioVideoConnectOptions,
+  TwilioVideoEventEmitter,
+} from '../TwilioVideo';
 import ListenersByEventType, { Listener } from './ListenersByEventType';
 import type { LocalParticipantAttributes } from './LocalParticipant';
 import LocalParticipant from './LocalParticipant';
@@ -25,6 +33,12 @@ interface RoomAttributes {
   isRecording: boolean;
   localParticipant: LocalParticipantAttributes | null;
   remoteParticipants: RemoteParticipantAttributes[];
+}
+
+export interface RoomConnectOptions {
+  roomName?: string;
+  audioTracks?: LocalAudioTrack[];
+  videoTracks?: LocalVideoTrack[];
 }
 
 export interface SubscriptionsByEventType {
@@ -70,8 +84,31 @@ export default class Room implements RoomAttributes {
     );
   }
 
-  static connect = async (token: string, options: any): Promise<Room> => {
-    const roomAttributes = await TwilioVideo.connect(token, options);
+  static connect = async (
+    token: string,
+    options: RoomConnectOptions
+  ): Promise<Room> => {
+    const { audioTracks, videoTracks, ...otherOptions } = options;
+
+    const twilioVideoConnectOptions = {
+      ...otherOptions,
+    } as TwilioVideoConnectOptions;
+
+    if (audioTracks) {
+      twilioVideoConnectOptions.audioTrackNames = audioTracks.map(
+        ({ name }) => name
+      );
+    }
+    if (videoTracks) {
+      twilioVideoConnectOptions.videoTrackNames = videoTracks.map(
+        ({ name }) => name
+      );
+    }
+
+    const roomAttributes = await TwilioVideo.connect(
+      token,
+      twilioVideoConnectOptions
+    );
     return new Room(roomAttributes);
   };
 

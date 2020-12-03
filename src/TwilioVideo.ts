@@ -13,8 +13,14 @@ import type {
 } from './models/LocalVideoTrack';
 import type Room from './models/Room';
 
+export interface TwilioVideoConnectOptions {
+  roomName?: string;
+  audioTrackNames?: string[];
+  videoTrackNames?: string[];
+}
+
 type TwilioVideoType = {
-  connect(token: string, options: any): Promise<Room>;
+  connect(token: string, options: TwilioVideoConnectOptions): Promise<Room>;
   disconnect(uuid: string): Promise<boolean>;
   updateLocalAudioTrack(
     name: string,

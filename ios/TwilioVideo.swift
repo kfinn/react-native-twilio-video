@@ -1,11 +1,16 @@
 import DictionaryCoding
 
+enum ConnectError: Error {
+    case audioTracksNotFound(names: [String])
+    case videoTracksNotFound(names: [String])
+}
+
 @objc(TwilioVideo)
 class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, LocalParticipantDelegate {
     override class func requiresMainQueueSetup() -> Bool {
         return false
     }
-
+    
     var rooms = [Room]()
     var localParticipants: [LocalParticipant] {
         get {
@@ -40,7 +45,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
     
     var localAudioTracksByName = [String: LocalAudioTrack]()
     var localVideoTracksByName = [String: LocalVideoTrack]()
-
+    
     private func findRoom(sid: String) -> Room? {
         return rooms.first { $0.sid == sid }
     }
@@ -75,56 +80,85 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         resolve: RCTPromiseResolveBlock,
         reject: RCTPromiseRejectBlock
     ) {
+        var audioTracksOption: [LocalAudioTrack]? = nil
+        if let audioTrackNames = options["audioTrackNames"] as? [String] {
+            let audioTracks = audioTrackNames.map { self.findLocalAudioTrack(name: $0) }
+            if let audioTracks = audioTracks as? [LocalAudioTrack] {
+                audioTracksOption = audioTracks
+            } else {
+                let invalidAudioTrackNames = audioTrackNames.filter { self.findLocalAudioTrack(name: $0) == nil}
+                reject("404", "Audio track not found", ConnectError.audioTracksNotFound(names: invalidAudioTrackNames))
+                return
+            }
+        }
+
+        var videoTracksOption: [LocalVideoTrack]? = nil
+        if let videoTrackNames = options["videoTrackNames"] as? [String] {
+            let videoTracks = videoTrackNames.map { self.findLocalVideoTrack(name: $0) }
+            if let videoTracks = videoTracks as? [LocalVideoTrack] {
+                videoTracksOption = videoTracks
+            } else {
+                let invalidVideoTrackNames = videoTrackNames.filter { self.findLocalVideoTrack(name: $0) == nil}
+                reject("404", "Video track not found", ConnectError.videoTracksNotFound(names: invalidVideoTrackNames))
+                return
+            }
+        }
+
+        
         let twilioOptions = ConnectOptions(token: token) { (builder) in
-//            if (options.keys.contains("audioTracks")) {
-//                builder.audioTracks
-//            }
-//            if (options.keys.contains("automaticSubscriptionEnabled")) {
-//                builder.automaticSubscriptionEnabled = options["automaticSubscriptionEnabled"]
-//            }
-//            if (options.keys.contains("dataTracks")) {
-//                builder.dataTracks
-//            }
-//            builder.delegateQueue
-//            if (options.keys.contains("dominantSpeakerEnabled")) {
-//                builder.dominantSpeakerEnabled = options["dominantSpeakerEnabled"]
-//            }
-//            if (options.keys.contains("encodingParameters")) {
-//                builder.encodingParameters
-//            }
-//            if (options.keys.contains("iceOptions")) {
-//                builder.iceOptions
-//            }
-//            if (options.keys.contains("insightsEnabled")) {
-//                builder.insightsEnabled
-//            }
-//            if (options.keys.contains("networkPrivacyPolicy")) {
-//                builder.networkPrivacyPolicy
-//            }
-//            if (options.keys.contains("networkQualityEnabled")) {
-//                builder.networkQualityEnabled
-//            }
-//            if (options.keys.contains("networkQualityConfiguration")) {
-//                builder.networkQualityConfiguration
-//            }
-//            if (options.keys.contains("preferredAudioCodecs")) {
-//                builder.preferredAudioCodecs
-//            }
-//            if (options.keys.contains("preferredVideoCodecs")) {
-//                builder.preferredVideoCodecs
-//            }
-//            if (options.keys.contains("region")) {
-//                builder.region
-//            }
-           if (options.keys.contains("roomName")) {
-               builder.roomName = options["roomName"] as? String
-           }
-//            if (options.keys.contains("videoTracks")) {
-//                builder.videoTracks
-//            }
-//            if (options.keys.contains("bandwidthProfileOptions")) {
-//                builder.bandwidthProfileOptions
-//            }
+            if let roomName = options["roomName"] as? String {
+                builder.roomName = roomName
+            }
+            
+            if let audioTracksOption = audioTracksOption {
+                builder.audioTracks = audioTracksOption
+            }
+            
+            if let videoTracksOption = videoTracksOption {
+                builder.videoTracks = videoTracksOption
+            }
+                        
+            
+            //            if (options.keys.contains("automaticSubscriptionEnabled")) {
+            //                builder.automaticSubscriptionEnabled = options["automaticSubscriptionEnabled"]
+            //            }
+            //            if (options.keys.contains("dataTracks")) {
+            //                builder.dataTracks
+            //            }
+            //            builder.delegateQueue
+            //            if (options.keys.contains("dominantSpeakerEnabled")) {
+            //                builder.dominantSpeakerEnabled = options["dominantSpeakerEnabled"]
+            //            }
+            //            if (options.keys.contains("encodingParameters")) {
+            //                builder.encodingParameters
+            //            }
+            //            if (options.keys.contains("iceOptions")) {
+            //                builder.iceOptions
+            //            }
+            //            if (options.keys.contains("insightsEnabled")) {
+            //                builder.insightsEnabled
+            //            }
+            //            if (options.keys.contains("networkPrivacyPolicy")) {
+            //                builder.networkPrivacyPolicy
+            //            }
+            //            if (options.keys.contains("networkQualityEnabled")) {
+            //                builder.networkQualityEnabled
+            //            }
+            //            if (options.keys.contains("networkQualityConfiguration")) {
+            //                builder.networkQualityConfiguration
+            //            }
+            //            if (options.keys.contains("preferredAudioCodecs")) {
+            //                builder.preferredAudioCodecs
+            //            }
+            //            if (options.keys.contains("preferredVideoCodecs")) {
+            //                builder.preferredVideoCodecs
+            //            }
+            //            if (options.keys.contains("region")) {
+            //                builder.region
+            //            }
+            //            if (options.keys.contains("bandwidthProfileOptions")) {
+            //                builder.bandwidthProfileOptions
+            //            }
         }
         
         let room = TwilioVideoSDK.connect(options: twilioOptions, delegate: self)
@@ -173,7 +207,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
             reject("404", "LocalVideoTrack not found", nil)
         }
     }
-
+    
     @objc(updateRemoteAudioTrack:params:resolver:rejecter:)
     func updateRemoteAudioTrack(sid: String, params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if let remoteAudioTrack = findRemoteAudioTrack(sid: sid) {
@@ -232,7 +266,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
             reject("422", "Unable to create local video track", error)
         }
     }
-
+    
     @objc(destroyLocalAudioTrack:resolver:rejecter:)
     func destroyLocalAudioTrack(name: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if let localAudioTrack = findLocalAudioTrack(name: name) {
@@ -248,7 +282,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
             reject("404", "Local video track not found", nil)
         }
     }
-
+    
     @objc(destroyLocalVideoTrack:resolver:rejecter:)
     func destroyLocalVideoTrack(name: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
         if let localVideoTrack = findLocalVideoTrack(name: name) {
@@ -257,7 +291,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
                     localParticipant.unpublishVideoTrack(localVideoTrack)
                 }
             }
-
+            
             localVideoTrack.destroyFromReact() { (error) in
                 if let error = error {
                     reject("422", error.localizedDescription, error)
@@ -282,7 +316,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
             reject("404", "Local audio track or participant not found", nil)
         }
     }
-
+    
     @objc(publishLocalVideoTrack:resolver:rejecter:)
     func publishLocalVideoTrack(params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if let localVideoTrackName = params["localVideoTrackName"] as? String,
@@ -306,7 +340,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
             reject("404", "Local audio track or participant not found", nil)
         }
     }
-
+    
     @objc(unpublishLocalVideoTrack:resolver:rejecter:)
     func unpublishLocalVideoTrack(params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if let localVideoTrackName = params["localVideoTrackName"] as? String,
@@ -331,7 +365,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
             "Room.recordingStarted",
             "Room.recordingStopped",
             "Room.dominantSpeakerChanged",
-
+            
             "RemoteParticipant.audioTrackDisabled",
             "RemoteParticipant.audioTrackEnabled",
             "RemoteParticipant.audioTrackPublished",
@@ -357,7 +391,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
             "RemoteParticipant.videoTrackSwitchedOn",
             "RemoteParticipant.videoTrackUnpublished",
             "RemoteParticipant.videoTrackUnsubscribed",
-
+            
             "LocalParticipant.audioTrackPublicationFailed",
             "LocalParticipant.audioTrackPublished",
             "LocalParticipant.dataTrackPublicationFailed",
@@ -380,6 +414,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
     
     func roomDidConnect(room: Room) {
         room.localParticipant!.delegate = self
+        room.remoteParticipants.forEach { $0.delegate = self }
         if (!isObserving) {
             return
         }

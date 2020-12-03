@@ -1,6 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
-import TwilioVideo, {
+import {
   LocalAudioTrack,
   LocalVideoTrack,
   LocalVideoTrackView,
@@ -14,7 +14,6 @@ export default function App() {
   const [room, setRoom] = useState<Room>();
   const [localAudioTrack, setLocalAudioTrack] = useState<LocalAudioTrack>();
   const [localVideoTrack, setLocalVideoTrack] = useState<LocalVideoTrack>();
-  const [publishedTracks, setPublishedTracks] = useState(false);
   const [roomStateVersion, setRoomStateVersion] = useState(0);
   const roomChanged = useCallback(() => {
     setRoomStateVersion((previousVersion) => previousVersion + 1);
@@ -79,78 +78,24 @@ export default function App() {
   }, [roomChanged]);
 
   useEffect(() => {
+    if (!localAudioTrack || !localVideoTrack) {
+      return;
+    }
+
     let roomResolver: any;
     const roomPromise = new Promise((resolve) => (roomResolver = resolve));
 
     const connectAsync = async () => {
       try {
-        const connectedRoom = await TwilioVideo.connect('token', {
+        const connectedRoom = await Room.connect('token', {
           roomName: 'roomName',
+          audioTracks: [localAudioTrack],
+          videoTracks: [localVideoTrack],
         });
 
-        connectedRoom.on('connected', (data) => {
-          const { localParticipant } = data.room as Room;
-
-          localParticipant!.on('audioTrackPublicationFailed', () => {
-            console.log('audioTrackPublicationFailed');
-            roomChanged();
-          });
-
-          localParticipant!.on('audioTrackPublished', () => {
-            console.log('audioTrackPublished');
-            roomChanged();
-          });
-
-          localParticipant!.on('dataTrackPublicationFailed', () => {
-            console.log('dataTrackPublicationFailed');
-            roomChanged();
-          });
-
-          localParticipant!.on('dataTrackPublished', () => {
-            console.log('dataTrackPublished');
-            roomChanged();
-          });
-
-          localParticipant!.on('networkQualityLevelChanged', () => {
-            console.log('networkQualityLevelChanged');
-            roomChanged();
-          });
-
-          localParticipant!.on('videoTrackPublicationFailed', () => {
-            console.log('videoTrackPublicationFailed');
-            roomChanged();
-          });
-
-          localParticipant!.on('videoTrackPublished', () => {
-            console.log('videoTrackPublished');
-            roomChanged();
-          });
-
-          console.log('connected');
-          roomChanged();
-        });
-        connectedRoom.on('failedToConnect', () => {
-          console.log('failedToConnect');
-          roomChanged();
-        });
-        connectedRoom.on('disconnected', () => {
-          console.log('disconnected');
-          roomChanged();
-        });
-        connectedRoom.on('reconnecting', () => {
-          console.log('reconnecting');
-          roomChanged();
-        });
-        connectedRoom.on('reconnected', () => {
-          console.log('reconnected');
-          roomChanged();
-        });
-        connectedRoom.on('participantConnected', (data) => {
-          console.log('participantConnected');
-          roomChanged();
-
-          const { participant } = data as { participant: RemoteParticipant };
-
+        const subscribeToRemoteParticipant = (
+          participant: RemoteParticipant
+        ) => {
           participant.on('audioTrackDisabled', () => {
             console.log('audioTrackDisabled');
             roomChanged();
@@ -286,6 +231,73 @@ export default function App() {
             console.log('videoTrackUnsubscribed');
             roomChanged();
           });
+        };
+
+        connectedRoom.on('connected', (data) => {
+          const { localParticipant, remoteParticipants } = data.room as Room;
+
+          localParticipant!.on('audioTrackPublicationFailed', () => {
+            console.log('audioTrackPublicationFailed');
+            roomChanged();
+          });
+
+          localParticipant!.on('audioTrackPublished', () => {
+            console.log('audioTrackPublished');
+            roomChanged();
+          });
+
+          localParticipant!.on('dataTrackPublicationFailed', () => {
+            console.log('dataTrackPublicationFailed');
+            roomChanged();
+          });
+
+          localParticipant!.on('dataTrackPublished', () => {
+            console.log('dataTrackPublished');
+            roomChanged();
+          });
+
+          localParticipant!.on('networkQualityLevelChanged', () => {
+            console.log('networkQualityLevelChanged');
+            roomChanged();
+          });
+
+          localParticipant!.on('videoTrackPublicationFailed', () => {
+            console.log('videoTrackPublicationFailed');
+            roomChanged();
+          });
+
+          localParticipant!.on('videoTrackPublished', () => {
+            console.log('videoTrackPublished');
+            roomChanged();
+          });
+
+          remoteParticipants.forEach(subscribeToRemoteParticipant);
+
+          console.log('connected');
+          roomChanged();
+        });
+        connectedRoom.on('failedToConnect', () => {
+          console.log('failedToConnect');
+          roomChanged();
+        });
+        connectedRoom.on('disconnected', () => {
+          console.log('disconnected');
+          roomChanged();
+        });
+        connectedRoom.on('reconnecting', () => {
+          console.log('reconnecting');
+          roomChanged();
+        });
+        connectedRoom.on('reconnected', () => {
+          console.log('reconnected');
+          roomChanged();
+        });
+        connectedRoom.on('participantConnected', (data) => {
+          console.log('participantConnected');
+          roomChanged();
+
+          const { participant } = data as { participant: RemoteParticipant };
+          subscribeToRemoteParticipant(participant);
         });
         connectedRoom.on('participantDisconnected', () => {
           console.log('participantDisconnected');
@@ -322,44 +334,7 @@ export default function App() {
       };
       cleanupAsync();
     };
-  }, [roomChanged]);
-
-  useEffect(() => {
-    if (
-      !room ||
-      room.state !== 'connected' ||
-      !localAudioTrack ||
-      !localVideoTrack ||
-      publishedTracks
-    ) {
-      return;
-    }
-    const localParticipant = room.localParticipant;
-    if (!localParticipant) {
-      return;
-    }
-
-    const publishTracksAsync = async () => {
-      try {
-        console.log('publishing!', localAudioTrack, localVideoTrack);
-        await Promise.all([
-          localParticipant.publishLocalAudioTrack(localAudioTrack),
-          localParticipant.publishLocalVideoTrack(localVideoTrack),
-        ]);
-      } catch (exception) {
-        console.log(exception);
-      }
-    };
-
-    publishTracksAsync();
-    setPublishedTracks(true);
-  }, [
-    roomStateVersion,
-    room,
-    localAudioTrack,
-    localVideoTrack,
-    publishedTracks,
-  ]);
+  }, [roomChanged, localAudioTrack, localVideoTrack]);
 
   return (
     <ScrollView style={styles.container}>
