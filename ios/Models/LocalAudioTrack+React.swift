@@ -44,6 +44,10 @@ struct LocalAudioTrackCreateParams: Codable {
     }
 }
 
+struct LocalAudioTrackUpdateParams: Codable {
+    let enabled: Bool?
+}
+
 extension LocalAudioTrack {
     func toReactAttributes() -> [String: Any] {
         return [
@@ -62,6 +66,12 @@ extension LocalAudioTrack {
                 enabled: params.enabled ?? true,
                 name: params.name
             )
+        }
+    }
+    
+    func updateFromReact(params: LocalAudioTrackUpdateParams) {
+        if let enabled = params.enabled {
+            self.isEnabled = enabled
         }
     }
     

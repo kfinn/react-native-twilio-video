@@ -16,6 +16,10 @@ import type Room from './models/Room';
 type TwilioVideoType = {
   connect(token: string, options: any): Promise<Room>;
   disconnect(uuid: string): Promise<boolean>;
+  updateLocalAudioTrack(
+    name: string,
+    params: { enabled: boolean }
+  ): Promise<boolean>;
   updateRemoteAudioTrack(
     sid: string,
     params: { isPlaybackEnabled: boolean }
