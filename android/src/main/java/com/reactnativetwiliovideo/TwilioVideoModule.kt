@@ -1,6 +1,7 @@
 package com.reactnativetwiliovideo
 
 import com.facebook.react.bridge.*
+import com.facebook.react.module.annotations.ReactModule
 import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEmitter
 import com.google.gson.Gson
 import com.reactnativetwiliovideo.models.*
@@ -8,6 +9,7 @@ import com.twilio.video.*
 import java.util.logging.Logger
 
 
+@ReactModule(name = "TwilioVideo")
 class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), Room.Listener, LocalParticipant.Listener, RemoteParticipant.Listener {
   override fun getName(): String {
     return "TwilioVideo"

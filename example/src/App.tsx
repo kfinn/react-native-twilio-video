@@ -1,5 +1,13 @@
 import React, { useCallback, useEffect, useState } from 'react';
-import { SafeAreaView, ScrollView, StyleSheet, Text, View } from 'react-native';
+import {
+  PermissionsAndroid,
+  Platform,
+  SafeAreaView,
+  ScrollView,
+  StyleSheet,
+  Text,
+  View,
+} from 'react-native';
 import {
   LocalAudioTrack,
   LocalVideoTrack,
@@ -11,6 +19,7 @@ import {
 } from 'react-native-twilio-video';
 
 export default function App() {
+  const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [room, setRoom] = useState<Room>();
   const [localAudioTrack, setLocalAudioTrack] = useState<LocalAudioTrack>();
   const [localVideoTrack, setLocalVideoTrack] = useState<LocalVideoTrack>();
@@ -20,6 +29,29 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    const requestPermissionsAsync = async () => {
+      const permissions = await PermissionsAndroid.requestMultiple([
+        PermissionsAndroid.PERMISSIONS.RECORD_AUDIO,
+        PermissionsAndroid.PERMISSIONS.CAMERA,
+      ]);
+      setPermissionsGranted(
+        permissions['android.permission.RECORD_AUDIO'] === 'granted' &&
+          permissions['android.permission.CAMERA'] === 'granted'
+      );
+    };
+
+    if (Platform.OS === 'android') {
+      requestPermissionsAsync();
+    } else {
+      setPermissionsGranted(true);
+    }
+  }, []);
+
+  useEffect(() => {
+    if (!permissionsGranted) {
+      return;
+    }
+
     let localVideoTrackResolve: (
       value?: LocalVideoTrack | PromiseLike<LocalVideoTrack> | undefined
     ) => void;
@@ -46,9 +78,12 @@ export default function App() {
       };
       cleanupAsync();
     };
-  }, [roomChanged]);
+  }, [permissionsGranted]);
 
   useEffect(() => {
+    if (!permissionsGranted) {
+      return;
+    }
     let localAudioTrackResolve: (
       value?: LocalAudioTrack | PromiseLike<LocalAudioTrack> | undefined
     ) => void;
@@ -75,7 +110,7 @@ export default function App() {
       };
       cleanupAsync();
     };
-  }, [roomChanged]);
+  }, [permissionsGranted]);
 
   useEffect(() => {
     if (!localAudioTrack || !localVideoTrack) {
@@ -335,6 +370,14 @@ export default function App() {
       cleanupAsync();
     };
   }, [roomChanged, localAudioTrack, localVideoTrack]);
+
+  if (!permissionsGranted) {
+    return (
+      <SafeAreaView>
+        <Text>Please grant access to your microphone and camera</Text>
+      </SafeAreaView>
+    );
+  }
 
   return (
     <ScrollView style={styles.container}>
