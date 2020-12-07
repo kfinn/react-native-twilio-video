@@ -68,8 +68,8 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
     promise: Promise
   ) {
     var audioTracksOption: List<LocalAudioTrack>? = null
-    val audioTrackNames = options.getArray("audioTrackNames")?.toArrayList()
-    if (audioTrackNames != null) {
+    if (options.hasKey("audioTrackNames")) {
+      val audioTrackNames = options.getArray("audioTrackNames")!!.toArrayList()
       val audioTracks = audioTrackNames.map { findLocalAudioTrack(it as String) }
       if (audioTracks.all { it != null }) {
         audioTracksOption = audioTracks.requireNoNulls()
@@ -80,8 +80,8 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
     }
 
     var videoTracksOption: List<LocalVideoTrack>? = null
-    val videoTrackNames = options.getArray("videoTrackNames")?.toArrayList()
-    if (videoTrackNames != null) {
+    if (options.hasKey("videoTrackNames")) {
+      val videoTrackNames = options.getArray("videoTrackNames")!!.toArrayList()
       val videoTracks = videoTrackNames.map { findLocalVideoTrack(it as String) }
       if (videoTracks.all { it != null }) {
         videoTracksOption = videoTracks.requireNoNulls()
