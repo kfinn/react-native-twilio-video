@@ -3,8 +3,12 @@ import { requireNativeComponent, ViewProps } from 'react-native';
 import type LocalVideoTrack from '../models/LocalVideoTrack';
 
 const NativeLocalVideoTrackView = requireNativeComponent<
-  { name: string } & ViewProps
+  { name: string } & LocalVideoTrackViewCommonProps
 >('LocalVideoTrackView');
+
+interface LocalVideoTrackViewCommonProps extends ViewProps {
+  scaleType?: 'aspectFill' | 'aspectFit';
+}
 
 interface LocalVideoTrackViewPropsByName {
   name: string;
@@ -18,16 +22,17 @@ type LocalVideoTrackViewProps = (
   | LocalVideoTrackViewPropsByName
   | LocalVideoTrackViewPropsByModel
 ) &
-  ViewProps;
+  LocalVideoTrackViewCommonProps;
 
 export default function LocalVideoTrackView(props: LocalVideoTrackViewProps) {
   const {
     name: optionalName,
     localVideoTrack,
+    scaleType,
     ...viewProps
   } = props as LocalVideoTrackViewPropsByName &
     LocalVideoTrackViewPropsByModel &
-    ViewProps;
+    LocalVideoTrackViewCommonProps;
 
   const name = optionalName ?? localVideoTrack?.name;
 
@@ -35,5 +40,11 @@ export default function LocalVideoTrackView(props: LocalVideoTrackViewProps) {
     throw 'must specify name or localVideoTrack';
   }
 
-  return <NativeLocalVideoTrackView name={name} {...viewProps} />;
+  return (
+    <NativeLocalVideoTrackView
+      name={name}
+      scaleType={scaleType}
+      {...viewProps}
+    />
+  );
 }

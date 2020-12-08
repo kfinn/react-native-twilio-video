@@ -21,7 +21,7 @@ class RemoteVideoTrackView : UIView {
             }
         }
     }
-    
+
     var remoteVideoTrack: RemoteVideoTrack? {
         didSet {
             if let oldValue = oldValue {
@@ -33,6 +33,17 @@ class RemoteVideoTrackView : UIView {
         }
     }
     
+    @objc var scaleType: String? {
+        didSet {
+            if let scaleType = scaleType,
+               let contentMode = UIView.ContentMode.fromReactScaleType(scaleType) {
+                videoView.contentMode = contentMode
+            } else {
+                videoView.contentMode = .scaleAspectFit
+            }
+        }
+    }
+
     lazy var videoView: VideoView = {
         let videoView = VideoView()
         videoView.autoresizingMask = [AutoresizingMask.flexibleWidth, AutoresizingMask.flexibleHeight]

@@ -3,5 +3,6 @@
 @interface RCT_EXTERN_MODULE(LocalVideoTrackViewManager, RCTViewManager)
 
 RCT_EXPORT_VIEW_PROPERTY(name, NSString *)
+RCT_EXPORT_VIEW_PROPERTY(scaleType, NSString *)
 
 @end

@@ -386,6 +386,7 @@ export default function App() {
         {localVideoTrack && (
           <LocalVideoTrackView
             localVideoTrack={localVideoTrack}
+            scaleType="aspectFill"
             style={styles.video}
           />
         )}
@@ -697,6 +698,7 @@ export default function App() {
                                           remoteVideoTrack={
                                             remoteVideoTrackPublication.remoteTrack
                                           }
+                                          scaleType="aspectFill"
                                           style={styles.video}
                                         />
                                         <Text>
@@ -864,7 +866,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   video: {
-    height: 150,
+    height: 100,
     width: 100,
   },
 });

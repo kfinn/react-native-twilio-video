@@ -3,8 +3,12 @@ import { requireNativeComponent, ViewProps } from 'react-native';
 import type RemoteVideoTrack from '../models/RemoteVideoTrack';
 
 const NativeRemoteVideoTrackView = requireNativeComponent<
-  { sid: string } & ViewProps
+  { sid: string } & RemotelVideoTrackViewCommonProps
 >('RemoteVideoTrackView');
+
+interface RemotelVideoTrackViewCommonProps extends ViewProps {
+  scaleType?: 'aspectFill' | 'aspectFit';
+}
 
 interface RemoteVideoTrackViewPropsBySid {
   sid: string;
@@ -18,16 +22,17 @@ type RemoteVideoTrackViewProps = (
   | RemoteVideoTrackViewPropsBySid
   | RemoteVideoTrackViewPropsByModel
 ) &
-  ViewProps;
+  RemotelVideoTrackViewCommonProps;
 
 export default function RemoteVideoTrackView(props: RemoteVideoTrackViewProps) {
   const {
     sid: optionalSid,
     remoteVideoTrack,
+    scaleType,
     ...viewProps
   } = props as RemoteVideoTrackViewPropsBySid &
     RemoteVideoTrackViewPropsByModel &
-    ViewProps;
+    RemotelVideoTrackViewCommonProps;
 
   const sid = optionalSid ?? remoteVideoTrack?.sid;
 
@@ -35,5 +40,11 @@ export default function RemoteVideoTrackView(props: RemoteVideoTrackViewProps) {
     throw 'must specify sid or remoteVideoTrack';
   }
 
-  return <NativeRemoteVideoTrackView sid={sid} {...viewProps} />;
+  return (
+    <NativeRemoteVideoTrackView
+      sid={sid}
+      scaleType={scaleType}
+      {...viewProps}
+    />
+  );
 }
