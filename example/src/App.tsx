@@ -387,6 +387,7 @@ export default function App() {
           <LocalVideoTrackView
             localVideoTrack={localVideoTrack}
             scaleType="aspectFill"
+            mirror={true}
             style={styles.video}
           />
         )}
@@ -698,6 +699,7 @@ export default function App() {
                                           remoteVideoTrack={
                                             remoteVideoTrackPublication.remoteTrack
                                           }
+                                          mirror={true}
                                           scaleType="aspectFill"
                                           style={styles.video}
                                         />

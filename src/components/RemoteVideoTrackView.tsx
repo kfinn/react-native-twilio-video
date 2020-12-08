@@ -8,6 +8,7 @@ const NativeRemoteVideoTrackView = requireNativeComponent<
 
 interface RemotelVideoTrackViewCommonProps extends ViewProps {
   scaleType?: 'aspectFill' | 'aspectFit';
+  mirror?: boolean;
 }
 
 interface RemoteVideoTrackViewPropsBySid {
@@ -28,8 +29,7 @@ export default function RemoteVideoTrackView(props: RemoteVideoTrackViewProps) {
   const {
     sid: optionalSid,
     remoteVideoTrack,
-    scaleType,
-    ...viewProps
+    ...otherProps
   } = props as RemoteVideoTrackViewPropsBySid &
     RemoteVideoTrackViewPropsByModel &
     RemotelVideoTrackViewCommonProps;
@@ -40,11 +40,5 @@ export default function RemoteVideoTrackView(props: RemoteVideoTrackViewProps) {
     throw 'must specify sid or remoteVideoTrack';
   }
 
-  return (
-    <NativeRemoteVideoTrackView
-      sid={sid}
-      scaleType={scaleType}
-      {...viewProps}
-    />
-  );
+  return <NativeRemoteVideoTrackView sid={sid} {...otherProps} />;
 }

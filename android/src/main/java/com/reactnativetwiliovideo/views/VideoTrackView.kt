@@ -1,12 +1,10 @@
 package com.reactnativetwiliovideo.views
 
 import android.content.Context
-import android.view.View
 import android.widget.LinearLayout
 import com.twilio.video.VideoScaleType
 import com.twilio.video.VideoTrack
 import com.twilio.video.VideoView
-import java.util.logging.Logger
 
 class VideoTrackView(context: Context): LinearLayout(context) {
   private val videoView = VideoView(context)
@@ -26,5 +24,11 @@ class VideoTrackView(context: Context): LinearLayout(context) {
     get() = videoView.videoScaleType
     set(value) {
       videoView.videoScaleType = value
+    }
+
+  var mirror: Boolean
+    get() = videoView.mirror
+    set(value) {
+      videoView.mirror = value
     }
 }

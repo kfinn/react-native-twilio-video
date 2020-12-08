@@ -6,6 +6,7 @@ import com.facebook.react.uimanager.ThemedReactContext
 import com.facebook.react.uimanager.annotations.ReactProp
 import com.reactnativetwiliovideo.TwilioVideoModule
 import com.reactnativetwiliovideo.models.videoScaleTypeFromReactScaleType
+import com.twilio.video.VideoScaleType
 
 class RemoteVideoTrackViewManager(private val context: ReactApplicationContext) : SimpleViewManager<VideoTrackView>() {
   override fun getName(): String {
@@ -25,5 +26,10 @@ class RemoteVideoTrackViewManager(private val context: ReactApplicationContext) 
   @ReactProp(name = "scaleType")
   fun setScaleType(view: VideoTrackView, scaleType: String?) {
     view.videoScaleType = videoScaleTypeFromReactScaleType(scaleType) ?: VideoScaleType.ASPECT_FIT
+  }
+
+  @ReactProp(name = "mirror")
+  fun setMirror(view: VideoTrackView, mirror: Boolean?) {
+    view.mirror = mirror ?: false
   }
 }

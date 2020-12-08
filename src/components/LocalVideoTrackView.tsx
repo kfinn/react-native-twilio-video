@@ -8,6 +8,7 @@ const NativeLocalVideoTrackView = requireNativeComponent<
 
 interface LocalVideoTrackViewCommonProps extends ViewProps {
   scaleType?: 'aspectFill' | 'aspectFit';
+  mirror?: boolean;
 }
 
 interface LocalVideoTrackViewPropsByName {
@@ -28,8 +29,7 @@ export default function LocalVideoTrackView(props: LocalVideoTrackViewProps) {
   const {
     name: optionalName,
     localVideoTrack,
-    scaleType,
-    ...viewProps
+    ...otherProps
   } = props as LocalVideoTrackViewPropsByName &
     LocalVideoTrackViewPropsByModel &
     LocalVideoTrackViewCommonProps;
@@ -40,11 +40,5 @@ export default function LocalVideoTrackView(props: LocalVideoTrackViewProps) {
     throw 'must specify name or localVideoTrack';
   }
 
-  return (
-    <NativeLocalVideoTrackView
-      name={name}
-      scaleType={scaleType}
-      {...viewProps}
-    />
-  );
+  return <NativeLocalVideoTrackView name={name} {...otherProps} />;
 }

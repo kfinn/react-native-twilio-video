@@ -43,6 +43,12 @@ class LocalVideoTrackView : UIView {
             }
         }
     }
+
+    @objc var mirror: Bool = false {
+        didSet {
+            videoView.shouldMirror = mirror
+        }
+    }
     
     lazy var videoView: VideoView = {
         let videoView = VideoView()
