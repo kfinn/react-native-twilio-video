@@ -14,7 +14,7 @@ enum LocalVideoTrackCreateError : Error {
 struct LocalVideoTrackCreateVideoSourceParams: Codable {
     let enablePreview: Bool?
     
-    func toSource() throws -> VideoSource {
+    func toSource() throws -> CameraSource {
         let options = CameraSourceOptions() { (builder) in
             if let enablePreview = enablePreview {
                 builder.enablePreview = enablePreview
@@ -33,9 +33,34 @@ let kDefaultLocalVideoTrackCreateVideoSourceParams = LocalVideoTrackCreateVideoS
     enablePreview: true
 )
 
+struct VideoFormatDimensionsCreateParams: Codable {
+    let width: Int32
+    let height: Int32
+    
+    func toDimensions() -> CMVideoDimensions {
+        return CMVideoDimensions(
+            width: width,
+            height: height
+        )
+    }
+}
+
+struct VideoFormatCreateParams: Codable {
+    let dimensions: VideoFormatDimensionsCreateParams
+    let framerate: UInt
+    
+    func toVideoFormat() -> VideoFormat {
+        let videoFormat = VideoFormat()
+        videoFormat.dimensions = dimensions.toDimensions()
+        videoFormat.frameRate = framerate
+        videoFormat.pixelFormat = PixelFormat.formatYUV420BiPlanarFullRange
+        return videoFormat
+    }
+}
 
 struct LocalVideoTrackCreateParams: Codable {
     let source: LocalVideoTrackCreateVideoSourceParams?
+    let format: VideoFormatCreateParams?
     let enabled: Bool?
     let name: String?
     
@@ -61,12 +86,36 @@ extension LocalVideoTrack {
         ]
     }
     
-    class func createFromReact(params: LocalVideoTrackCreateParams) throws -> LocalVideoTrack? {
-        return LocalVideoTrack(
-            source: try (params.source ?? kDefaultLocalVideoTrackCreateVideoSourceParams).toSource(),
-            enabled: params.enabled ?? true,
-            name: params.name
-        )
+    class func createFromReact(params: LocalVideoTrackCreateParams, completion: @escaping (_ localVideoTrack: LocalVideoTrack?, _ error: Error?) -> Void) {
+        do {
+            let source = try (params.source ?? kDefaultLocalVideoTrackCreateVideoSourceParams).toSource()
+            let localVideoTrack = LocalVideoTrack(
+                source: source,
+                enabled: params.enabled ?? true,
+                name: params.name
+            )!
+            
+            let device = CameraSource.captureDevice(position: .front)!
+            
+            let innerCompletion = { (device: AVCaptureDevice?, format: VideoFormat, error: Error?) in
+                completion(localVideoTrack, error)
+            }
+            
+            if let format = params.format {
+                source.startCapture(
+                    device: device,
+                    format: format.toVideoFormat(),
+                    completion: innerCompletion
+                )
+            } else {
+                source.startCapture(
+                    device: device,
+                    completion: innerCompletion
+                )
+            }
+        } catch {
+            completion(nil, error)
+        }
     }
     
     func updateFromReact(params: LocalVideoTrackUpdateParams) {

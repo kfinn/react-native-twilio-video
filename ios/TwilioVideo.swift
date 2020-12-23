@@ -1,12 +1,7 @@
 import DictionaryCoding
 
-enum ConnectError: Error {
-    case audioTracksNotFound(names: [String])
-    case videoTracksNotFound(names: [String])
-}
-
 @objc(TwilioVideo)
-class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, LocalParticipantDelegate {
+class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, LocalParticipantDelegate, TwilioVideoSDKReactDataSource {
     override class func requiresMainQueueSetup() -> Bool {
         return false
     }
@@ -54,7 +49,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         return localParticipants.first { $0.sid == sid }
     }
     
-    private func findLocalAudioTrack(name: String) -> LocalAudioTrack? {
+    func findLocalAudioTrack(name: String) -> LocalAudioTrack? {
         return localAudioTracksByName[name]
     }
     
@@ -80,90 +75,19 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         resolve: RCTPromiseResolveBlock,
         reject: RCTPromiseRejectBlock
     ) {
-        var audioTracksOption: [LocalAudioTrack]? = nil
-        if let audioTrackNames = options["audioTrackNames"] as? [String] {
-            let audioTracks = audioTrackNames.map { self.findLocalAudioTrack(name: $0) }
-            if let audioTracks = audioTracks as? [LocalAudioTrack] {
-                audioTracksOption = audioTracks
-            } else {
-                let invalidAudioTrackNames = audioTrackNames.filter { self.findLocalAudioTrack(name: $0) == nil}
-                reject("404", "Audio track not found", ConnectError.audioTracksNotFound(names: invalidAudioTrackNames))
-                return
-            }
+        do {
+            let connectOptionsParams = try decoder.decode(ConnectOptionsParams.self, from: options)
+            let room = try TwilioVideoSDK.connectFromReact(
+                token: token,
+                params: connectOptionsParams,
+                delegate: self,
+                dataSource: self
+            )
+            rooms.append(room)
+            resolve(room.toReactAttributes())
+        } catch {
+            reject("422", "Unable to connect", error)
         }
-
-        var videoTracksOption: [LocalVideoTrack]? = nil
-        if let videoTrackNames = options["videoTrackNames"] as? [String] {
-            let videoTracks = videoTrackNames.map { self.findLocalVideoTrack(name: $0) }
-            if let videoTracks = videoTracks as? [LocalVideoTrack] {
-                videoTracksOption = videoTracks
-            } else {
-                let invalidVideoTrackNames = videoTrackNames.filter { self.findLocalVideoTrack(name: $0) == nil}
-                reject("404", "Video track not found", ConnectError.videoTracksNotFound(names: invalidVideoTrackNames))
-                return
-            }
-        }
-
-        
-        let twilioOptions = ConnectOptions(token: token) { (builder) in
-            if let roomName = options["roomName"] as? String {
-                builder.roomName = roomName
-            }
-            
-            if let audioTracksOption = audioTracksOption {
-                builder.audioTracks = audioTracksOption
-            }
-            
-            if let videoTracksOption = videoTracksOption {
-                builder.videoTracks = videoTracksOption
-            }
-                        
-            
-            //            if (options.keys.contains("automaticSubscriptionEnabled")) {
-            //                builder.automaticSubscriptionEnabled = options["automaticSubscriptionEnabled"]
-            //            }
-            //            if (options.keys.contains("dataTracks")) {
-            //                builder.dataTracks
-            //            }
-            //            builder.delegateQueue
-            //            if (options.keys.contains("dominantSpeakerEnabled")) {
-            //                builder.dominantSpeakerEnabled = options["dominantSpeakerEnabled"]
-            //            }
-            //            if (options.keys.contains("encodingParameters")) {
-            //                builder.encodingParameters
-            //            }
-            //            if (options.keys.contains("iceOptions")) {
-            //                builder.iceOptions
-            //            }
-            //            if (options.keys.contains("insightsEnabled")) {
-            //                builder.insightsEnabled
-            //            }
-            //            if (options.keys.contains("networkPrivacyPolicy")) {
-            //                builder.networkPrivacyPolicy
-            //            }
-            //            if (options.keys.contains("networkQualityEnabled")) {
-            //                builder.networkQualityEnabled
-            //            }
-            //            if (options.keys.contains("networkQualityConfiguration")) {
-            //                builder.networkQualityConfiguration
-            //            }
-            //            if (options.keys.contains("preferredAudioCodecs")) {
-            //                builder.preferredAudioCodecs
-            //            }
-            //            if (options.keys.contains("preferredVideoCodecs")) {
-            //                builder.preferredVideoCodecs
-            //            }
-            //            if (options.keys.contains("region")) {
-            //                builder.region
-            //            }
-            //            if (options.keys.contains("bandwidthProfileOptions")) {
-            //                builder.bandwidthProfileOptions
-            //            }
-        }
-        
-        let room = TwilioVideoSDK.connect(options: twilioOptions, delegate: self)
-        rooms.append(room)
-        resolve(room.toReactAttributes())
     }
     
     @objc(disconnect:resolver:rejecter:)
@@ -251,15 +175,13 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
                     return
                 }
             }
-            let localVideoTrack = try LocalVideoTrack.createFromReact(params: localVideoTrackCreateParams)!
-            localVideoTracksByName[localVideoTrack.name] = localVideoTrack
-            let cameraSource = localVideoTrack.source as! CameraSource
-            let device = CameraSource.captureDevice(position: .front)!
-            cameraSource.startCapture(device: device) { (device, format, error) in
-                if let error = error {
-                    reject("422", "Unable to create local video track", error)
-                } else {
+            
+            LocalVideoTrack.createFromReact(params: localVideoTrackCreateParams) { (localVideoTrack, error) in
+                if let localVideoTrack = localVideoTrack, error == nil {
+                    self.localVideoTracksByName[localVideoTrack.name] = localVideoTrack
                     resolve(localVideoTrack.toReactAttributes())
+                } else {
+                    reject("422", "Unable to create local video track", error)
                 }
             }
         } catch {

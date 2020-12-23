@@ -61,7 +61,15 @@ export default function App() {
 
     const asyncCreateLocalVideoTrack = async () => {
       try {
-        const createdLocalVideoTrack = await LocalVideoTrack.create();
+        const createdLocalVideoTrack = await LocalVideoTrack.create({
+          format: {
+            dimensions: {
+              width: 640,
+              height: 480,
+            },
+            framerate: 30,
+          },
+        });
         setLocalVideoTrack(createdLocalVideoTrack);
         localVideoTrackResolve(createdLocalVideoTrack);
       } catch (error) {
@@ -386,7 +394,7 @@ export default function App() {
         {localVideoTrack && (
           <LocalVideoTrackView
             localVideoTrack={localVideoTrack}
-            scaleType="aspectFill"
+            scaleType="aspectFit"
             mirror={true}
             style={styles.video}
           />
@@ -700,7 +708,7 @@ export default function App() {
                                             remoteVideoTrackPublication.remoteTrack
                                           }
                                           mirror={true}
-                                          scaleType="aspectFill"
+                                          scaleType="aspectFit"
                                           style={styles.video}
                                         />
                                         <Text>

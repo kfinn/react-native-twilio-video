@@ -4,6 +4,13 @@ export interface LocalVideoTrackCreateParams {
   source?: {
     enablePreview?: boolean;
   };
+  format?: {
+    dimensions: {
+      width: number;
+      height: number;
+    };
+    framerate: number;
+  };
   enabled?: boolean;
   name?: string;
 }

@@ -13,10 +13,49 @@ import type {
 } from './models/LocalVideoTrack';
 import type Room from './models/Room';
 
+export interface VideoDimensions {
+  width: number;
+  height: number;
+}
+
+export type NetworkQualityVerbosity = 'minimal' | 'none';
+export type BandwidthProfileVideoMode =
+  | 'grid'
+  | 'collaboration'
+  | 'presentation';
+export type TrackPriority = 'low' | 'standard' | 'high';
+export type TrackSwitchOffMode = 'predicted' | 'detected' | 'disabled';
+
 export interface TwilioVideoConnectOptions {
   roomName?: string;
   audioTrackNames?: string[];
   videoTrackNames?: string[];
+  isAutomaticSubscriptionEnabled?: boolean;
+  isNetworkQualityEnabled?: boolean;
+  isInsightsEnabled?: boolean;
+  networkQualityConfiguration?: {
+    local: NetworkQualityVerbosity;
+    remote: NetworkQualityVerbosity;
+  };
+  isDominantSpeakerEnabled?: boolean;
+  encodingParameters?: {
+    audioBitrate: number;
+    videoBitrate: number;
+  };
+  bandwidthProfile?: {
+    video: {
+      mode?: BandwidthProfileVideoMode;
+      maxTracks?: number;
+      dominantSpeakerPriority?: TrackPriority;
+      trackSwitchOffMode?: TrackSwitchOffMode;
+      renderDimensions?: {
+        low: VideoDimensions;
+        standard: VideoDimensions;
+        high: VideoDimensions;
+      };
+      maxSubscriptionBitrate?: number;
+    };
+  };
 }
 
 type TwilioVideoType = {
