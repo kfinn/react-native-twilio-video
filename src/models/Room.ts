@@ -35,11 +35,13 @@ interface RoomAttributes {
   remoteParticipants: RemoteParticipantAttributes[];
 }
 
-export interface RoomConnectOptions {
-  roomName?: string;
+type RoomConnectOptions = Omit<
+  TwilioVideoConnectOptions,
+  'audioTrackNames' | 'videoTrackNames'
+> & {
   audioTracks?: LocalAudioTrack[];
   videoTracks?: LocalVideoTrack[];
-}
+};
 
 export interface SubscriptionsByEventType {
   [key: string]: EmitterSubscription;

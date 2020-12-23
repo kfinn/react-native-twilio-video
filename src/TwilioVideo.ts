@@ -13,10 +13,61 @@ import type {
 } from './models/LocalVideoTrack';
 import type Room from './models/Room';
 
+export interface VideoDimensions {
+  width: number;
+  height: number;
+}
+
+export type NetworkQualityVerbosity = 'minimal' | 'none';
+export type BandwidthProfileVideoMode =
+  | 'grid'
+  | 'collaboration'
+  | 'presentation';
+export type TrackPriority = 'low' | 'standard' | 'high';
+export type TrackSwitchOffMode = 'predicted' | 'detected' | 'disabled';
+
+interface SimpleVideoCodec {
+  codec: 'h264' | 'vp9';
+}
+
+interface Vp8VideoCodec {
+  codec: 'vp8';
+  simulcast?: boolean;
+}
+
+export type VideoCodec = Vp8VideoCodec | SimpleVideoCodec;
+
 export interface TwilioVideoConnectOptions {
   roomName?: string;
   audioTrackNames?: string[];
   videoTrackNames?: string[];
+  isAutomaticSubscriptionEnabled?: boolean;
+  isNetworkQualityEnabled?: boolean;
+  isInsightsEnabled?: boolean;
+  networkQualityConfiguration?: {
+    local: NetworkQualityVerbosity;
+    remote: NetworkQualityVerbosity;
+  };
+  isDominantSpeakerEnabled?: boolean;
+  encodingParameters?: {
+    audioBitrate: number;
+    videoBitrate: number;
+  };
+  bandwidthProfile?: {
+    video: {
+      mode?: BandwidthProfileVideoMode;
+      maxTracks?: number;
+      dominantSpeakerPriority?: TrackPriority;
+      trackSwitchOffMode?: TrackSwitchOffMode;
+      renderDimensions?: {
+        low: VideoDimensions;
+        standard: VideoDimensions;
+        high: VideoDimensions;
+      };
+      maxSubscriptionBitrate?: number;
+    };
+  };
+  preferredVideoCodecs?: VideoCodec[];
 }
 
 type TwilioVideoType = {

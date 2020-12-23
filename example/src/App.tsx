@@ -61,7 +61,15 @@ export default function App() {
 
     const asyncCreateLocalVideoTrack = async () => {
       try {
-        const createdLocalVideoTrack = await LocalVideoTrack.create();
+        const createdLocalVideoTrack = await LocalVideoTrack.create({
+          format: {
+            dimensions: {
+              width: 640,
+              height: 480,
+            },
+            framerate: 24,
+          },
+        });
         setLocalVideoTrack(createdLocalVideoTrack);
         localVideoTrackResolve(createdLocalVideoTrack);
       } catch (error) {
@@ -126,6 +134,39 @@ export default function App() {
           roomName: 'roomName',
           audioTracks: [localAudioTrack],
           videoTracks: [localVideoTrack],
+          isNetworkQualityEnabled: true,
+          networkQualityConfiguration: {
+            local: 'minimal',
+            remote: 'minimal',
+          },
+          isDominantSpeakerEnabled: true,
+          encodingParameters: {
+            audioBitrate: 16,
+            videoBitrate: 0,
+          },
+          bandwidthProfile: {
+            video: {
+              mode: 'collaboration',
+              trackSwitchOffMode: 'detected',
+              maxTracks: 5,
+              dominantSpeakerPriority: 'standard',
+              renderDimensions: {
+                high: {
+                  width: 1280,
+                  height: 720,
+                },
+                standard: {
+                  width: 320,
+                  height: 240,
+                },
+                low: {
+                  width: 160,
+                  height: 120,
+                },
+              },
+            },
+          },
+          preferredVideoCodecs: [{ codec: 'vp8', simulcast: true }],
         });
 
         const subscribeToRemoteParticipant = (
@@ -868,7 +909,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   video: {
-    height: 100,
-    width: 100,
+    height: 200,
+    width: 200,
   },
 });
