@@ -30,6 +30,7 @@ fun createLocalVideoTrackFromReact(context: Context, localVideoTrackCreateParams
       context,
       frontFacingCameraName
     ),
+    localVideoTrackCreateParams.format?.toVideoFormat() ?: null,
     localVideoTrackCreateParams.name
   )
 }

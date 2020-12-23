@@ -10,7 +10,7 @@ import java.util.logging.Logger
 
 
 @ReactModule(name = "TwilioVideo")
-class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), Room.Listener, LocalParticipant.Listener, RemoteParticipant.Listener {
+class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBaseJavaModule(reactContext), Room.Listener, LocalParticipant.Listener, RemoteParticipant.Listener, TwilioVideoSDKReactDataSource {
   override fun getName(): String {
     return "TwilioVideo"
   }
@@ -26,11 +26,11 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
     return rooms.find { it.sid == sid }
   }
 
-  private fun findLocalAudioTrack(name: String): LocalAudioTrack? {
+  override fun findLocalAudioTrack(name: String): LocalAudioTrack? {
     return localAudioTracksByName[name]
   }
 
-  fun findLocalVideoTrack(name: String): LocalVideoTrack? {
+  override fun findLocalVideoTrack(name: String): LocalVideoTrack? {
     return localVideoTracksByName[name]
   }
 
@@ -67,49 +67,20 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
     options: ReadableMap,
     promise: Promise
   ) {
-    var audioTracksOption: List<LocalAudioTrack>? = null
-    if (options.hasKey("audioTrackNames")) {
-      val audioTrackNames = options.getArray("audioTrackNames")!!.toArrayList()
-      val audioTracks = audioTrackNames.map { findLocalAudioTrack(it as String) }
-      if (audioTracks.all { it != null }) {
-        audioTracksOption = audioTracks.requireNoNulls()
-      } else {
-        promise.reject("404", "Audio track(s) not found")
-        return
-      }
+    try {
+      val connectOptionsParams = gson.fromJson(gson.toJsonTree(options.toPlainCollection()), ConnectOptionsParams::class.java)
+      val room = connectFromReact(
+        reactApplicationContext,
+        token,
+        connectOptionsParams,
+        this,
+        this
+      )
+      rooms.add(room)
+      promise.resolve(room.toReactAttributes())
+    } catch (exception: Exception) {
+      promise.reject("422", "Unable to connect", exception)
     }
-
-    var videoTracksOption: List<LocalVideoTrack>? = null
-    if (options.hasKey("videoTrackNames")) {
-      val videoTrackNames = options.getArray("videoTrackNames")!!.toArrayList()
-      val videoTracks = videoTrackNames.map { findLocalVideoTrack(it as String) }
-      if (videoTracks.all { it != null }) {
-        videoTracksOption = videoTracks.requireNoNulls()
-      } else {
-        promise.reject("404", "Video track(s) not found")
-        return
-      }
-    }
-
-    val connectOptionsBuilder = ConnectOptions.Builder(token)
-
-    val roomName = options.getString("roomName")
-    if (roomName != null) {
-      connectOptionsBuilder.roomName(roomName)
-    }
-
-    if (audioTracksOption != null) {
-      connectOptionsBuilder.audioTracks(audioTracksOption)
-    }
-
-    if (videoTracksOption != null) {
-      connectOptionsBuilder.videoTracks(videoTracksOption)
-    }
-    val connectOptions = connectOptionsBuilder.build()
-
-    val room = Video.connect(reactApplicationContext, connectOptions, this)
-    rooms.add(room)
-    promise.resolve(room.toReactAttributes())
   }
 
 
@@ -130,7 +101,7 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
     val localAudioTrack = findLocalAudioTrack(name)
     if (localAudioTrack != null) {
       try {
-        val localAudioTrackUpdateParams = gson.fromJson(gson.toJsonTree(params.toHashMap()), LocalAudioTrackUpdateParams::class.java)
+        val localAudioTrackUpdateParams = gson.fromJson(gson.toJsonTree(params.toPlainCollection()), LocalAudioTrackUpdateParams::class.java)
         localAudioTrack.updateFromReact(localAudioTrackUpdateParams)
         promise.resolve(true)
       } catch (exception: Exception) {
@@ -146,7 +117,7 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
     val localVideoTrack = findLocalVideoTrack(name)
     if (localVideoTrack != null) {
       try {
-        val localVideoTrackUpdateParams = gson.fromJson(gson.toJsonTree(params.toHashMap()), LocalVideoTrackUpdateParams::class.java)
+        val localVideoTrackUpdateParams = gson.fromJson(gson.toJsonTree(params.toPlainCollection()), LocalVideoTrackUpdateParams::class.java)
         localVideoTrack.updateFromReact(localVideoTrackUpdateParams)
         promise.resolve(true)
       } catch (exception: Exception) {
@@ -162,7 +133,7 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
     val remoteAudioTrack = findRemoteAudioTrack(sid)
     if (remoteAudioTrack != null) {
       try {
-        val remoteAudioTrackUpdateParams = gson.fromJson(gson.toJsonTree(params.toHashMap()), RemoteAudioTrackUpdateParams::class.java)
+        val remoteAudioTrackUpdateParams = gson.fromJson(gson.toJsonTree(params.toPlainCollection()), RemoteAudioTrackUpdateParams::class.java)
         remoteAudioTrack.updateFromReact(remoteAudioTrackUpdateParams)
         promise.resolve(true)
       } catch (exception: Exception) {
@@ -176,7 +147,7 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
   @ReactMethod
   fun createLocalAudioTrack(params: ReadableMap, promise: Promise) {
     try {
-      val localAudioTrackCreateParams = gson.fromJson(gson.toJsonTree(params.toHashMap()), LocalAudioTrackCreateParams::class.java)
+      val localAudioTrackCreateParams = gson.fromJson(gson.toJsonTree(params.toPlainCollection()), LocalAudioTrackCreateParams::class.java)
       val name = localAudioTrackCreateParams.name
       if (name != null) {
         if (localAudioTracksByName.keys.contains(name)) {
@@ -200,7 +171,7 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
   @ReactMethod
   fun createLocalVideoTrack(params: ReadableMap, promise: Promise) {
     try {
-      val localVideoTrackCreateParams = gson.fromJson(gson.toJsonTree(params.toHashMap()), LocalVideoTrackCreateParams::class.java)
+      val localVideoTrackCreateParams = gson.fromJson(gson.toJsonTree(params.toPlainCollection()), LocalVideoTrackCreateParams::class.java)
       val name = localVideoTrackCreateParams.name
       if (name != null) {
         if (localVideoTracksByName.keys.contains(name)) {
