@@ -26,6 +26,17 @@ export type BandwidthProfileVideoMode =
 export type TrackPriority = 'low' | 'standard' | 'high';
 export type TrackSwitchOffMode = 'predicted' | 'detected' | 'disabled';
 
+interface SimpleVideoCodec {
+  codec: 'h264' | 'vp9';
+}
+
+interface Vp8VideoCodec {
+  codec: 'vp8';
+  simulcast?: boolean;
+}
+
+export type VideoCodec = Vp8VideoCodec | SimpleVideoCodec;
+
 export interface TwilioVideoConnectOptions {
   roomName?: string;
   audioTrackNames?: string[];
@@ -56,6 +67,7 @@ export interface TwilioVideoConnectOptions {
       maxSubscriptionBitrate?: number;
     };
   };
+  preferredVideoCodecs?: VideoCodec[];
 }
 
 type TwilioVideoType = {

@@ -4,14 +4,9 @@ import type {
   LocalVideoTrack,
 } from 'react-native-twilio-video';
 import {
-  BandwidthProfileVideoMode,
-  NetworkQualityVerbosity,
-  TrackPriority,
-  TrackSwitchOffMode,
   TwilioVideo,
   TwilioVideoConnectOptions,
   TwilioVideoEventEmitter,
-  VideoDimensions,
 } from '../TwilioVideo';
 import ListenersByEventType, { Listener } from './ListenersByEventType';
 import type { LocalParticipantAttributes } from './LocalParticipant';
@@ -40,37 +35,13 @@ interface RoomAttributes {
   remoteParticipants: RemoteParticipantAttributes[];
 }
 
-export interface RoomConnectOptions {
-  roomName?: string;
+type RoomConnectOptions = Omit<
+  TwilioVideoConnectOptions,
+  'audioTrackNames' | 'videoTrackNames'
+> & {
   audioTracks?: LocalAudioTrack[];
   videoTracks?: LocalVideoTrack[];
-  isAutomaticSubscriptionEnabled?: boolean;
-  isNetworkQualityEnabled?: boolean;
-  isInsightsEnabled?: boolean;
-  networkQualityConfiguration?: {
-    local: NetworkQualityVerbosity;
-    remote: NetworkQualityVerbosity;
-  };
-  isDominantSpeakerEnabled?: boolean;
-  encodingParameters?: {
-    audioBitrate: number;
-    videoBitrate: number;
-  };
-  bandwidthProfile?: {
-    video: {
-      mode?: BandwidthProfileVideoMode;
-      maxTracks?: number;
-      dominantSpeakerPriority?: TrackPriority;
-      trackSwitchOffMode?: TrackSwitchOffMode;
-      renderDimensions?: {
-        low: VideoDimensions;
-        standard: VideoDimensions;
-        high: VideoDimensions;
-      };
-      maxSubscriptionBitrate?: number;
-    };
-  };
-}
+};
 
 export interface SubscriptionsByEventType {
   [key: string]: EmitterSubscription;

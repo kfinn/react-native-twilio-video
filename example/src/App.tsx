@@ -67,7 +67,7 @@ export default function App() {
               width: 640,
               height: 480,
             },
-            framerate: 30,
+            framerate: 24,
           },
         });
         setLocalVideoTrack(createdLocalVideoTrack);
@@ -134,6 +134,39 @@ export default function App() {
           roomName: 'roomName',
           audioTracks: [localAudioTrack],
           videoTracks: [localVideoTrack],
+          isNetworkQualityEnabled: true,
+          networkQualityConfiguration: {
+            local: 'minimal',
+            remote: 'minimal',
+          },
+          isDominantSpeakerEnabled: true,
+          encodingParameters: {
+            audioBitrate: 16,
+            videoBitrate: 0,
+          },
+          bandwidthProfile: {
+            video: {
+              mode: 'collaboration',
+              trackSwitchOffMode: 'detected',
+              maxTracks: 5,
+              dominantSpeakerPriority: 'standard',
+              renderDimensions: {
+                high: {
+                  width: 1280,
+                  height: 720,
+                },
+                standard: {
+                  width: 320,
+                  height: 240,
+                },
+                low: {
+                  width: 160,
+                  height: 120,
+                },
+              },
+            },
+          },
+          preferredVideoCodecs: [{ codec: 'vp8', simulcast: true }],
         });
 
         const subscribeToRemoteParticipant = (
@@ -394,7 +427,7 @@ export default function App() {
         {localVideoTrack && (
           <LocalVideoTrackView
             localVideoTrack={localVideoTrack}
-            scaleType="aspectFit"
+            scaleType="aspectFill"
             mirror={true}
             style={styles.video}
           />
@@ -708,7 +741,7 @@ export default function App() {
                                             remoteVideoTrackPublication.remoteTrack
                                           }
                                           mirror={true}
-                                          scaleType="aspectFit"
+                                          scaleType="aspectFill"
                                           style={styles.video}
                                         />
                                         <Text>
@@ -876,7 +909,7 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   video: {
-    height: 100,
-    width: 100,
+    height: 200,
+    width: 200,
   },
 });

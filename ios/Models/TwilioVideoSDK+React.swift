@@ -14,6 +14,7 @@ enum ConnectError: Error {
     case invalidBandwidthProfileMode
     case invalidTrackPriority
     case invalidTrackSwitchOffMode
+    case invalidVideoCodec
 }
 
 extension NetworkQualityVerbosity {
@@ -97,6 +98,28 @@ struct RenderDimensionsParams: Codable {
     }
 }
 
+struct VideoCodecParams: Codable {
+    let codec: String
+    let simulcast: Bool?
+    
+    func toVideoCodec() throws -> VideoCodec {
+        switch codec {
+        case "h264":
+            return H264Codec()
+        case "vp9":
+            return Vp9Codec()
+        case "vp8":
+            if let simulcast = simulcast {
+                return Vp8Codec(simulcast: simulcast)
+            } else {
+                return Vp8Codec()
+            }
+        default:
+            throw ConnectError.invalidVideoCodec
+        }
+    }
+}
+
 struct ConnectOptionsBandwidthProfileVideoParams: Codable {
     let mode: String?
     let maxTracks: Int?
@@ -173,6 +196,7 @@ struct ConnectOptionsParams: Codable {
     let isDominantSpeakerEnabled: Bool?
     let encodingParameters: ConnectOptionsEncodingParametersParams?
     let bandwidthProfile: ConnectOptionsBandwidthProfileParams?
+    let preferredVideoCodecs: [VideoCodecParams]?
     
     func findAudioTracks(dataSource: TwilioVideoSDKReactDataSource) throws -> [LocalAudioTrack]? {
         if let audioTrackNames = audioTrackNames {
@@ -205,6 +229,7 @@ struct ConnectOptionsParams: Codable {
         let videoTracks = try findVideoTracks(dataSource: dataSource)
         let networkQualityConfiguration = try self.networkQualityConfiguration?.toNetworkQualityConfiguration()
         let bandwidthProfile = try self.bandwidthProfile?.toBandwidthProfileOptions()
+        let preferredVideoCodecs = try self.preferredVideoCodecs?.map { try $0.toVideoCodec() }
         
         return ConnectOptions(token: token) { (builder) in
             builder.roomName = roomName
@@ -234,6 +259,9 @@ struct ConnectOptionsParams: Codable {
             }
             if let bandwidthProfile = bandwidthProfile {
                 builder.bandwidthProfileOptions = bandwidthProfile
+            }
+            if let preferredVideoCodecs = preferredVideoCodecs {
+                builder.preferredVideoCodecs = preferredVideoCodecs
             }
         }
     }
