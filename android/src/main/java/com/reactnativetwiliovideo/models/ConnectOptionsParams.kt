@@ -80,9 +80,9 @@ data class VideoCodecParams(
 
   fun toVideoCodec(): VideoCodec {
     return when (codec) {
-      "h264" -> H264Codec()
-      "vp9" -> Vp9Codec()
-      "vp8" -> if (simulcast != null) Vp8Codec(simulcast) else Vp8Codec()
+      "H264" -> H264Codec()
+      "VP9" -> Vp9Codec()
+      "VP8" -> if (simulcast != null) Vp8Codec(simulcast) else Vp8Codec()
       else -> throw InvalidVideoCodecException()
     }
   }

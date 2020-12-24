@@ -27,11 +27,11 @@ export type TrackPriority = 'low' | 'standard' | 'high';
 export type TrackSwitchOffMode = 'predicted' | 'detected' | 'disabled';
 
 interface SimpleVideoCodec {
-  codec: 'h264' | 'vp9';
+  codec: 'H264' | 'VP9';
 }
 
 interface Vp8VideoCodec {
-  codec: 'vp8';
+  codec: 'VP8';
   simulcast?: boolean;
 }
 

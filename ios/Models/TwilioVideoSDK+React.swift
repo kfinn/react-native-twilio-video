@@ -104,11 +104,11 @@ struct VideoCodecParams: Codable {
     
     func toVideoCodec() throws -> VideoCodec {
         switch codec {
-        case "h264":
+        case "H264":
             return H264Codec()
-        case "vp9":
+        case "VP9":
             return Vp9Codec()
-        case "vp8":
+        case "VP8":
             if let simulcast = simulcast {
                 return Vp8Codec(simulcast: simulcast)
             } else {

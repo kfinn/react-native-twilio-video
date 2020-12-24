@@ -166,7 +166,7 @@ export default function App() {
               },
             },
           },
-          preferredVideoCodecs: [{ codec: 'vp8', simulcast: true }],
+          preferredVideoCodecs: [{ codec: 'VP8', simulcast: true }],
         });
 
         const subscribeToRemoteParticipant = (
