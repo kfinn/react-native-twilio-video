@@ -49,7 +49,18 @@ struct VideoFormatCreateParams: Codable {
     let dimensions: VideoFormatDimensionsCreateParams
     let framerate: UInt
     
-    func toVideoFormat() -> VideoFormat {
+    func toCaptureFormat(captureDevice: AVCaptureDevice) -> VideoFormat {
+        let maybeSupportedFormats = CameraSource.supportedFormats(captureDevice: captureDevice)
+        let supportedFormats = maybeSupportedFormats.compactMap { $0 as? VideoFormat }.filter { $0.pixelFormat == .formatYUV420BiPlanarFullRange }
+        let nearestFormat = supportedFormats.first { $0.dimensions.width >= dimensions.width && $0.dimensions.height > dimensions.height }
+        
+        let captureFormat = nearestFormat ?? supportedFormats.last!
+        captureFormat.frameRate = framerate
+        
+        return captureFormat
+    }
+    
+    func toOutputFormat() -> VideoFormat {
         let videoFormat = VideoFormat()
         videoFormat.dimensions = dimensions.toDimensions()
         videoFormat.frameRate = framerate
@@ -102,11 +113,8 @@ extension LocalVideoTrack {
             }
             
             if let format = params.format {
-                source.startCapture(
-                    device: device,
-                    format: format.toVideoFormat(),
-                    completion: innerCompletion
-                )
+                source.requestOutputFormat(format.toOutputFormat())
+                source.startCapture(device: device, format: format.toCaptureFormat(captureDevice: device), completion: innerCompletion)
             } else {
                 source.startCapture(
                     device: device,
