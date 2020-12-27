@@ -101,7 +101,16 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
   fun listCameras(promise: Promise) {
     val camera1Enumerator = Camera1Enumerator()
     val cameraResults = Arguments.createArray()
-    camera1Enumerator.deviceNames.forEach { cameraResults.pushString(it) }
+    camera1Enumerator.deviceNames.forEach {
+      val deviceAttributes = Arguments.createMap()
+      deviceAttributes.putString("id", it)
+      deviceAttributes.putString("name", it)
+      deviceAttributes.putString(
+        "position",
+        if (camera1Enumerator.isFrontFacing(it)) "front" else if (camera1Enumerator.isBackFacing(it)) "back" else null
+      )
+      cameraResults.pushMap(deviceAttributes)
+    }
     promise.resolve(cameraResults)
   }
 

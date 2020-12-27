@@ -70,10 +70,16 @@ export interface TwilioVideoConnectOptions {
   preferredVideoCodecs?: VideoCodec[];
 }
 
+export interface Camera {
+  id: string;
+  name: string;
+  position: 'front' | 'back' | null;
+}
+
 type TwilioVideoType = {
   connect(token: string, options: TwilioVideoConnectOptions): Promise<Room>;
   disconnect(uuid: string): Promise<boolean>;
-  listCameras(): Promise<string[]>;
+  listCameras(): Promise<Camera[]>;
   updateLocalAudioTrack(
     name: string,
     params: { enabled: boolean }

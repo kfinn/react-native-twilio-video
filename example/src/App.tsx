@@ -10,6 +10,7 @@ import {
   View,
 } from 'react-native';
 import TwilioVideo, {
+  Camera,
   LocalAudioTrack,
   LocalVideoTrack,
   LocalVideoTrackView,
@@ -20,8 +21,8 @@ import TwilioVideo, {
 } from 'react-native-twilio-video';
 
 export default function App() {
-  const [cameras, setCameras] = useState<string[]>([]);
-  const [selectedCamera, setSelectedCamera] = useState<string>();
+  const [cameras, setCameras] = useState<Camera[]>([]);
+  const [deviceId, setDeviceId] = useState<string>();
   const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [room, setRoom] = useState<Room>();
   const [localAudioTrack, setLocalAudioTrack] = useState<LocalAudioTrack>();
@@ -56,8 +57,7 @@ export default function App() {
     }
 
     const listCamerasAsync = async () => {
-      const rawCameras = await TwilioVideo.listCameras();
-      setCameras(rawCameras);
+      setCameras(await TwilioVideo.listCameras());
     };
 
     listCamerasAsync();
@@ -85,7 +85,7 @@ export default function App() {
             },
             framerate: 24,
           },
-          deviceName: selectedCamera,
+          deviceId,
         });
         setLocalVideoTrack(createdLocalVideoTrack);
         localVideoTrackResolve(createdLocalVideoTrack);
@@ -103,7 +103,7 @@ export default function App() {
       };
       cleanupAsync();
     };
-  }, [permissionsGranted, selectedCamera]);
+  }, [permissionsGranted, deviceId]);
 
   useEffect(() => {
     if (!permissionsGranted) {
@@ -450,11 +450,13 @@ export default function App() {
           />
         )}
         <Text>Cameras:</Text>
-        {cameras.map((c) => (
+        {cameras.map(({ id, name, position }) => (
           <Button
-            key={c}
-            title={`${c}${selectedCamera === c ? ' (selected)' : ''}`}
-            onPress={() => setSelectedCamera(c)}
+            key={id}
+            title={`${name} (${position}) ${
+              deviceId === id ? ' (selected)' : ''
+            }`}
+            onPress={() => setDeviceId(id)}
           />
         ))}
         {room ? (

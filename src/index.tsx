@@ -15,9 +15,10 @@ import RemoteParticipant from './models/RemoteParticipant';
 import RemoteVideoTrack from './models/RemoteVideoTrack';
 import RemoteVideoTrackPublication from './models/RemoteVideoTrackPublication';
 import Room from './models/Room';
-import { TwilioVideo } from './TwilioVideo';
+import { Camera, TwilioVideo } from './TwilioVideo';
 
 export {
+  Camera,
   LocalAudioTrack,
   LocalAudioTrackPublication,
   LocalDataTrack,

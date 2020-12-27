@@ -6,7 +6,7 @@ import com.twilio.video.VideoFormat
 data class LocalVideoTrackCreateParams(
   val enabled: Boolean? = null,
   val name: String? = null,
-  val deviceName: String? = null,
+  val deviceId: String? = null,
   val format: FormatParams? = null
 ) {
   data class FormatParams(
