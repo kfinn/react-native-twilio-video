@@ -6,6 +6,7 @@ import com.facebook.react.modules.core.DeviceEventManagerModule.RCTDeviceEventEm
 import com.google.gson.Gson
 import com.reactnativetwiliovideo.models.*
 import com.twilio.video.*
+import tvi.webrtc.Camera1Enumerator
 import java.util.logging.Logger
 
 
@@ -94,6 +95,14 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
     } else {
       promise.reject("404", "Room not found", null)
     }
+  }
+
+  @ReactMethod
+  fun listCameras(promise: Promise) {
+    val camera1Enumerator = Camera1Enumerator()
+    val cameraResults = Arguments.createArray()
+    camera1Enumerator.deviceNames.forEach { cameraResults.pushString(it) }
+    promise.resolve(cameraResults)
   }
 
   @ReactMethod

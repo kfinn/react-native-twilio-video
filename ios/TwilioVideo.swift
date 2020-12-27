@@ -102,6 +102,14 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
         }
     }
     
+    @objc(resolver:rejecter:)
+    func listCameras(resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
+        resolve([
+            AVCaptureDevice.Position.front,
+            AVCaptureDevice.Position.back,
+        ])
+    }
+    
     @objc(updateLocalAudioTrack:params:resolver:rejecter:)
     func updateLocalAudioTrack(name: String, params: [String: Any], resolve: RCTPromiseResolveBlock, reject: RCTPromiseRejectBlock) {
         if let localAudioTrack = findLocalAudioTrack(name: name) {

@@ -15,6 +15,7 @@ import RemoteParticipant from './models/RemoteParticipant';
 import RemoteVideoTrack from './models/RemoteVideoTrack';
 import RemoteVideoTrackPublication from './models/RemoteVideoTrackPublication';
 import Room from './models/Room';
+import { TwilioVideo } from './TwilioVideo';
 
 export {
   LocalAudioTrack,
@@ -37,5 +38,6 @@ export {
 };
 
 const { connect } = Room;
+const { listCameras } = TwilioVideo;
 
-export default { connect };
+export default { connect, listCameras };

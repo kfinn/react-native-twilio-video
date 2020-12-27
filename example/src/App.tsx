@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  Button,
   PermissionsAndroid,
   Platform,
   SafeAreaView,
@@ -8,7 +9,7 @@ import {
   Text,
   View,
 } from 'react-native';
-import {
+import TwilioVideo, {
   LocalAudioTrack,
   LocalVideoTrack,
   LocalVideoTrackView,
@@ -19,6 +20,8 @@ import {
 } from 'react-native-twilio-video';
 
 export default function App() {
+  const [cameras, setCameras] = useState<string[]>([]);
+  const [selectedCamera, setSelectedCamera] = useState<string>();
   const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [room, setRoom] = useState<Room>();
   const [localAudioTrack, setLocalAudioTrack] = useState<LocalAudioTrack>();
@@ -48,6 +51,19 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (permissionsGranted) {
+      return;
+    }
+
+    const listCamerasAsync = async () => {
+      const rawCameras = await TwilioVideo.listCameras();
+      setCameras(rawCameras);
+    };
+
+    listCamerasAsync();
+  }, [permissionsGranted]);
+
+  useEffect(() => {
     if (!permissionsGranted) {
       return;
     }
@@ -69,6 +85,7 @@ export default function App() {
             },
             framerate: 24,
           },
+          deviceName: selectedCamera,
         });
         setLocalVideoTrack(createdLocalVideoTrack);
         localVideoTrackResolve(createdLocalVideoTrack);
@@ -86,7 +103,7 @@ export default function App() {
       };
       cleanupAsync();
     };
-  }, [permissionsGranted]);
+  }, [permissionsGranted, selectedCamera]);
 
   useEffect(() => {
     if (!permissionsGranted) {
@@ -432,6 +449,14 @@ export default function App() {
             style={styles.video}
           />
         )}
+        <Text>Cameras:</Text>
+        {cameras.map((c) => (
+          <Button
+            key={c}
+            title={`${c}${selectedCamera === c ? ' (selected)' : ''}`}
+            onPress={() => setSelectedCamera(c)}
+          />
+        ))}
         {room ? (
           <React.Fragment>
             <Text>Room:</Text>
