@@ -28,7 +28,7 @@ fun createLocalVideoTrackFromReact(context: Context, localVideoTrackCreateParams
     localVideoTrackCreateParams.enabled ?: true,
     CameraCapturer(
       context,
-      frontFacingCameraName
+      localVideoTrackCreateParams.deviceId ?: frontFacingCameraName
     ),
     localVideoTrackCreateParams.format?.toVideoFormat() ?: null,
     localVideoTrackCreateParams.name

@@ -1,5 +1,6 @@
 import React, { useCallback, useEffect, useState } from 'react';
 import {
+  Button,
   PermissionsAndroid,
   Platform,
   SafeAreaView,
@@ -8,7 +9,8 @@ import {
   Text,
   View,
 } from 'react-native';
-import {
+import TwilioVideo, {
+  Camera,
   LocalAudioTrack,
   LocalVideoTrack,
   LocalVideoTrackView,
@@ -19,6 +21,8 @@ import {
 } from 'react-native-twilio-video';
 
 export default function App() {
+  const [cameras, setCameras] = useState<Camera[]>([]);
+  const [deviceId, setDeviceId] = useState<string>();
   const [permissionsGranted, setPermissionsGranted] = useState(false);
   const [room, setRoom] = useState<Room>();
   const [localAudioTrack, setLocalAudioTrack] = useState<LocalAudioTrack>();
@@ -48,6 +52,18 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+    if (permissionsGranted) {
+      return;
+    }
+
+    const listCamerasAsync = async () => {
+      setCameras(await TwilioVideo.listCameras());
+    };
+
+    listCamerasAsync();
+  }, [permissionsGranted]);
+
+  useEffect(() => {
     if (!permissionsGranted) {
       return;
     }
@@ -69,6 +85,7 @@ export default function App() {
             },
             framerate: 24,
           },
+          deviceId,
         });
         setLocalVideoTrack(createdLocalVideoTrack);
         localVideoTrackResolve(createdLocalVideoTrack);
@@ -86,7 +103,7 @@ export default function App() {
       };
       cleanupAsync();
     };
-  }, [permissionsGranted]);
+  }, [permissionsGranted, deviceId]);
 
   useEffect(() => {
     if (!permissionsGranted) {
@@ -432,6 +449,16 @@ export default function App() {
             style={styles.video}
           />
         )}
+        <Text>Cameras:</Text>
+        {cameras.map(({ id, name, position }) => (
+          <Button
+            key={id}
+            title={`${name} (${position}) ${
+              deviceId === id ? ' (selected)' : ''
+            }`}
+            onPress={() => setDeviceId(id)}
+          />
+        ))}
         {room ? (
           <React.Fragment>
             <Text>Room:</Text>

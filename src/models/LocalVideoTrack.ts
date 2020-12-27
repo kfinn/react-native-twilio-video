@@ -13,6 +13,7 @@ export interface LocalVideoTrackCreateParams {
   };
   enabled?: boolean;
   name?: string;
+  deviceId?: string;
 }
 
 export interface LocalVideoTrackAttributes {

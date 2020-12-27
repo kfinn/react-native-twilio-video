@@ -74,9 +74,13 @@ struct LocalVideoTrackCreateParams: Codable {
     let format: VideoFormatCreateParams?
     let enabled: Bool?
     let name: String?
+    let deviceId: String?
     
-    var isEmpty: Bool {
-        return true
+    func toDevice() -> AVCaptureDevice {
+        if let deviceId = deviceId {
+            return AVCaptureDevice(uniqueID: deviceId)!
+        }
+        return CameraSource.captureDevice(position: .front)!
     }
 }
 
@@ -106,7 +110,7 @@ extension LocalVideoTrack {
                 name: params.name
             )!
             
-            let device = CameraSource.captureDevice(position: .front)!
+            let device = params.toDevice()
             
             let innerCompletion = { (device: AVCaptureDevice?, format: VideoFormat, error: Error?) in
                 completion(localVideoTrack, error)
