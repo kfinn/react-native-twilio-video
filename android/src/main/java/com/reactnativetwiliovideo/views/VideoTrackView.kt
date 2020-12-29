@@ -15,9 +15,11 @@ class VideoTrackView(context: Context): LinearLayout(context) {
 
   var videoTrack: VideoTrack? = null
     set(value) {
-      field?.removeSink(videoView)
+      if (value != field) {
+        field?.removeSink(videoView)
+        value?.addSink(videoView)
+      }
       field = value
-      value?.addSink(videoView)
     }
 
   var videoScaleType: VideoScaleType
