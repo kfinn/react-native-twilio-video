@@ -196,14 +196,13 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
     
     @objc(destroyLocalAudioTrack:resolver:rejecter:)
     func destroyLocalAudioTrack(name: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if let localAudioTrack = findLocalAudioTrack(name: name) {
+        if let localAudioTrack = localAudioTracksByName.removeValue(forKey: name) {
             localParticipants.forEach { (localParticipant) in
                 if localParticipant.localAudioTracks.contains(where: { $0.localTrack == localAudioTrack }) {
                     localParticipant.unpublishAudioTrack(localAudioTrack)
                 }
             }
             localAudioTrack.destroyFromReact()
-            localAudioTracksByName.removeValue(forKey: name)
             resolve(true)
         } else {
             reject("404", "Local video track not found", nil)
@@ -212,7 +211,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
     
     @objc(destroyLocalVideoTrack:resolver:rejecter:)
     func destroyLocalVideoTrack(name: String, resolve: @escaping RCTPromiseResolveBlock, reject: @escaping RCTPromiseRejectBlock) {
-        if let localVideoTrack = findLocalVideoTrack(name: name) {
+        if let localVideoTrack = self.localVideoTracksByName.removeValue(forKey: name) {
             localParticipants.forEach { (localParticipant) in
                 if localParticipant.localVideoTracks.contains(where: { $0.localTrack == localVideoTrack }) {
                     localParticipant.unpublishVideoTrack(localVideoTrack)
@@ -223,7 +222,6 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
                 if let error = error {
                     reject("422", error.localizedDescription, error)
                 } else {
-                    self.localVideoTracksByName.removeValue(forKey: name)
                     resolve(true)
                 }
             }

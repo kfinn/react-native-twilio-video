@@ -24,11 +24,9 @@ class LocalVideoTrackView : UIView {
     
     var localVideoTrack: LocalVideoTrack? {
         didSet {
-            if let oldValue = oldValue {
-                oldValue.removeRenderer(videoView)
-            }
-            if let newValue = localVideoTrack {
-                newValue.addRenderer(videoView)
+            if oldValue != localVideoTrack {
+                oldValue?.removeRenderer(videoView)
+                localVideoTrack?.addRenderer(videoView)
             }
         }
     }

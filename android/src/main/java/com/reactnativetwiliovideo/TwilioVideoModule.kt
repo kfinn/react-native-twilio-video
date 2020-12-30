@@ -236,6 +236,7 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
         }
       }
       localVideoTrack.destroyFromReact()
+      promise.resolve(true)
     } else {
       promise.reject("404", "Local video track not found", null)
     }

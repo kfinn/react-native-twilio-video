@@ -63,20 +63,17 @@ export default function App() {
     listCamerasAsync();
   }, [permissionsGranted]);
 
+  /* eslint-disable react-hooks/exhaustive-deps */
   useEffect(() => {
     if (!permissionsGranted) {
       return;
     }
 
-    let localVideoTrackResolve: (
-      value?: LocalVideoTrack | PromiseLike<LocalVideoTrack> | undefined
-    ) => void;
-    const localVideoTrackPromise = new Promise<LocalVideoTrack>(
-      (resolve) => (localVideoTrackResolve = resolve)
-    );
-
     const asyncCreateLocalVideoTrack = async () => {
       try {
+        if (localVideoTrack) {
+          await localVideoTrack.destroy();
+        }
         const createdLocalVideoTrack = await LocalVideoTrack.create({
           format: {
             dimensions: {
@@ -88,21 +85,11 @@ export default function App() {
           deviceId,
         });
         setLocalVideoTrack(createdLocalVideoTrack);
-        localVideoTrackResolve(createdLocalVideoTrack);
       } catch (error) {
         console.log(error);
       }
     };
     asyncCreateLocalVideoTrack();
-
-    return () => {
-      const cleanupAsync = async () => {
-        const createdLocalVideoTrack = await localVideoTrackPromise;
-        createdLocalVideoTrack.destroy();
-        setLocalVideoTrack(undefined);
-      };
-      cleanupAsync();
-    };
   }, [permissionsGranted, deviceId]);
 
   useEffect(() => {
@@ -138,10 +125,6 @@ export default function App() {
   }, [permissionsGranted]);
 
   useEffect(() => {
-    if (!localAudioTrack || !localVideoTrack) {
-      return;
-    }
-
     let roomResolver: any;
     const roomPromise = new Promise((resolve) => (roomResolver = resolve));
 
@@ -149,8 +132,6 @@ export default function App() {
       try {
         const connectedRoom = await Room.connect('token', {
           roomName: 'roomName',
-          audioTracks: [localAudioTrack],
-          videoTracks: [localVideoTrack],
           isNetworkQualityEnabled: true,
           networkQualityConfiguration: {
             local: 'minimal',
@@ -217,12 +198,12 @@ export default function App() {
             };
             const { remoteTrack } = publication;
 
-            remoteTrack!.setIsPlaybackEnabled(false).catch((reason) => {
-              console.log('remoteTrack.setIsPlaybackEnabled error');
-              roomChanged();
-              console.log(reason);
-              roomChanged();
-            });
+            remoteTrack!
+              .setIsPlaybackEnabled(false)
+              .then(roomChanged, (reason) => {
+                console.log('remoteTrack.setIsPlaybackEnabled error', reason);
+                roomChanged();
+              });
           });
 
           participant.on('audioTrackSubscriptionFailed', () => {
@@ -427,7 +408,28 @@ export default function App() {
       };
       cleanupAsync();
     };
-  }, [roomChanged, localAudioTrack, localVideoTrack]);
+  }, [roomChanged]);
+
+  const localParticipant = room?.localParticipant;
+  useEffect(() => {
+    if (localParticipant && localVideoTrack) {
+      localParticipant.publishLocalVideoTrack(localVideoTrack);
+      return () => {
+        localParticipant.unpublishLocalVideoTrack(localVideoTrack);
+      };
+    }
+    return;
+  }, [localParticipant, localVideoTrack]);
+
+  useEffect(() => {
+    if (localParticipant && localAudioTrack) {
+      localParticipant.publishLocalAudioTrack(localAudioTrack);
+      return () => {
+        localParticipant.unpublishLocalAudioTrack(localAudioTrack);
+      };
+    }
+    return;
+  }, [localParticipant, localAudioTrack]);
 
   if (!permissionsGranted) {
     return (

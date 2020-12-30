@@ -23,6 +23,7 @@ export interface LocalVideoTrackAttributes {
 }
 
 export default class LocalVideoTrack implements LocalVideoTrackAttributes {
+  isDestroyed = false;
   isEnabled: boolean;
   name: string;
   state: string | null;
@@ -49,6 +50,7 @@ export default class LocalVideoTrack implements LocalVideoTrackAttributes {
 
   async destroy(): Promise<void> {
     await TwilioVideo.destroyLocalVideoTrack(this.name);
+    this.isDestroyed = true;
     return;
   }
 
