@@ -24,11 +24,9 @@ class RemoteVideoTrackView : UIView {
 
     var remoteVideoTrack: RemoteVideoTrack? {
         didSet {
-            if let oldValue = oldValue {
-                oldValue.removeRenderer(videoView)
-            }
-            if let newValue = remoteVideoTrack {
-                newValue.addRenderer(videoView)
+            if oldValue != remoteVideoTrack {
+                oldValue?.removeRenderer(videoView)
+                remoteVideoTrack?.addRenderer(videoView)
             }
         }
     }
