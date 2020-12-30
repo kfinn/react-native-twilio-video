@@ -18,6 +18,7 @@ export interface LocalAudioTrackAttributes {
 }
 
 export default class LocalAudioTrack implements LocalAudioTrackAttributes {
+  isDestroyed = false;
   isEnabled: boolean;
   name: string;
   state: string | null;
@@ -44,6 +45,7 @@ export default class LocalAudioTrack implements LocalAudioTrackAttributes {
 
   async destroy(): Promise<void> {
     await TwilioVideo.destroyLocalAudioTrack(this.name);
+    this.isDestroyed = true;
     return;
   }
 

@@ -108,6 +108,10 @@ export default class LocalParticipant implements LocalParticipantAttributes {
       throw "can't unpublish local audio track before local participant has connected";
     }
 
+    if (localAudioTrack.isDestroyed) {
+      return Promise.resolve(true);
+    }
+
     return await TwilioVideo.unpublishLocalAudioTrack({
       localAudioTrackName: localAudioTrack.name,
       localParticipantSid: this.sid,
@@ -119,6 +123,10 @@ export default class LocalParticipant implements LocalParticipantAttributes {
   ): Promise<boolean> => {
     if (!this.sid) {
       throw "can't unpublish local video track before local participant has connected";
+    }
+
+    if (localVideoTrack.isDestroyed) {
+      return Promise.resolve(true);
     }
 
     return await TwilioVideo.unpublishLocalVideoTrack({
