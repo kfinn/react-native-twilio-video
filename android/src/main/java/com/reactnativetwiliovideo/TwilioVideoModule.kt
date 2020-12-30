@@ -212,7 +212,7 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
 
   @ReactMethod
   fun destroyLocalAudioTrack(name: String, promise: Promise) {
-    val localAudioTrack = findLocalAudioTrack(name)
+    val localAudioTrack = localAudioTracksByName.remove(name)
     if (localAudioTrack != null) {
       localParticipants.forEach { localParticipant ->
         if (localParticipant.localAudioTracks.any { it.localAudioTrack == localAudioTrack }) {
@@ -220,7 +220,6 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
         }
       }
       localAudioTrack.destroyFromReact()
-      localAudioTracksByName.remove(name)
       promise.resolve(true)
     } else {
       promise.reject("404", "Local video track not found", null)
@@ -229,14 +228,13 @@ class TwilioVideoModule(reactContext: ReactApplicationContext) : ReactContextBas
 
   @ReactMethod
   fun destroyLocalVideoTrack(name: String, promise: Promise) {
-    val localVideoTrack = findLocalVideoTrack(name)
+    val localVideoTrack = localVideoTracksByName.remove(name)
     if (localVideoTrack != null) {
       localParticipants.forEach { localParticipant ->
         if (localParticipant.localVideoTracks.any { it.localVideoTrack == localVideoTrack }) {
           localParticipant.unpublishTrack(localVideoTrack)
         }
       }
-
       localVideoTrack.destroyFromReact()
     } else {
       promise.reject("404", "Local video track not found", null)
