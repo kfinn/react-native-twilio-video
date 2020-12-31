@@ -1,11 +1,15 @@
 import LocalVideoTrackView from './components/LocalVideoTrackView';
 import RemoteVideoTrackView from './components/RemoteVideoTrackView';
-import LocalAudioTrack from './models/LocalAudioTrack';
+import LocalAudioTrack, {
+  LocalAudioTrackCreateParams,
+} from './models/LocalAudioTrack';
 import LocalAudioTrackPublication from './models/LocalAudioTrackPublication';
 import LocalDataTrack from './models/LocalDataTrack';
 import LocalDataTrackPublication from './models/LocalDataTrackPublication';
 import LocalParticipant from './models/LocalParticipant';
-import LocalVideoTrack from './models/LocalVideoTrack';
+import LocalVideoTrack, {
+  LocalVideoTrackCreateParams,
+} from './models/LocalVideoTrack';
 import LocalVideoTrackPublication from './models/LocalVideoTrackPublication';
 import RemoteAudioTrack from './models/RemoteAudioTrack';
 import RemoteAudioTrackPublication from './models/RemoteAudioTrackPublication';
@@ -20,11 +24,13 @@ import { Camera, TwilioVideo } from './TwilioVideo';
 export {
   Camera,
   LocalAudioTrack,
+  LocalAudioTrackCreateParams,
   LocalAudioTrackPublication,
   LocalDataTrack,
   LocalDataTrackPublication,
   LocalParticipant,
   LocalVideoTrack,
+  LocalVideoTrackCreateParams,
   LocalVideoTrackPublication,
   LocalVideoTrackView,
   RemoteAudioTrack,
