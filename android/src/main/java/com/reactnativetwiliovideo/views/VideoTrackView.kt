@@ -4,11 +4,11 @@ import android.content.Context
 import android.widget.LinearLayout
 import com.twilio.video.VideoScaleType
 import com.twilio.video.VideoTrack
-import com.twilio.video.VideoView
+import com.twilio.video.VideoTextureView
 import java.util.logging.Logger
 
 class VideoTrackView(context: Context): LinearLayout(context) {
-  private val videoView = VideoView(context)
+  private val videoView = VideoTextureView(context)
 
   init {
     addView(videoView)
