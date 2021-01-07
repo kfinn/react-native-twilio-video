@@ -27,6 +27,7 @@ class RemoteVideoTrackView : UIView {
             if oldValue != remoteVideoTrack {
                 oldValue?.removeRenderer(videoView)
                 remoteVideoTrack?.addRenderer(videoView)
+                videoView.shouldMirror = mirror
             }
         }
     }

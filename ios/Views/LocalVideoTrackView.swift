@@ -27,6 +27,7 @@ class LocalVideoTrackView : UIView {
             if oldValue != localVideoTrack {
                 oldValue?.removeRenderer(videoView)
                 localVideoTrack?.addRenderer(videoView)
+                videoView.shouldMirror = mirror
             }
         }
     }
