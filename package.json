@@ -1,6 +1,6 @@
 {
   "name": "@kfinn/react-native-twilio-video",
-  "version": "0.1.0",
+  "version": "0.0.0",
   "description": "react-native bindings for Twilio Video",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
@@ -140,6 +140,7 @@
     ]
   },
   "publishConfig": {
-    "access": "public"
+    "access": "public",
+    "registry": "https://registry.npmjs.org/"
   }
 }
