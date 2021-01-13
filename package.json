@@ -90,7 +90,8 @@
       "tagName": "v${version}"
     },
     "npm": {
-      "publish": true
+      "publish": true,
+      "publishPath": "--registry=@kfinn"
     },
     "github": {
       "release": true
