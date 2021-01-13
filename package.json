@@ -1,6 +1,6 @@
 {
   "name": "@kfinn/react-native-twilio-video",
-  "version": "0.2.3",
+  "version": "0.2.4",
   "description": "react-native bindings for Twilio Video",
   "main": "lib/commonjs/index",
   "module": "lib/module/index",
