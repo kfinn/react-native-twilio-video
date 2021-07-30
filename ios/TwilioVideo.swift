@@ -411,7 +411,7 @@ class TwilioVideo: RCTEventEmitter, RoomDelegate, RemoteParticipantDelegate, Loc
             withName: "Room.participantDisconnected",
             body: [
                 "room": room.toReactAttributes(),
-                "participant": room.toReactAttributes()
+                "participant": participant.toReactAttributes()
             ]
         )
     }
